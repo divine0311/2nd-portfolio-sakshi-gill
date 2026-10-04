@@ -47,18 +47,27 @@ const AUTHOR = seed.author;
 
 /* Canonical URLs and the sitemap need a real origin. There is no deployment
  * URL in this repo, so it must come from SITE_URL rather than be guessed. */
-const rawSite = (env.SITE_URL || '').replace(/\/$/, '');
-const siteUrl = rawSite || 'http://localhost:4173';
+const rawSite = (env.SITE_URL || '').trim().replace(/\/$/, '');
 
-/* A placeholder would ship silently-broken canonicals to production, which is
- * worse than an obvious build warning. */
-if (!rawSite || /YOUR-DOMAIN|example\.(com|org)|localhost/i.test(rawSite)) {
+/**
+ * A placeholder must never reach production. A canonical or og:url pointing at
+ * "https://YOUR-DOMAIN-HERE" is worse than no tag at all: Google logs crawl
+ * errors, and if that name is ever registered it hands the ranking to whoever
+ * owns it. So when there is no real domain, the absolute URLs are dropped
+ * instead of shipped, and the build says exactly what is missing.
+ */
+const knownSite = Boolean(rawSite) && !/YOUR-DOMAIN|example\.(com|org)|localhost/i.test(rawSite);
+const siteUrl = knownSite ? rawSite : '';
+
+if (!knownSite) {
   console.warn('');
-  console.warn('  ! SITE_URL is not a real domain in .env.');
-  console.warn(`    Every canonical, Open Graph and sitemap URL will point at "${siteUrl}".`);
-  console.warn('    Set SITE_URL to the live domain before deploying, then rebuild.');
+  console.warn('  ! SITE_URL is not a real domain, so no absolute URLs were written.');
+  console.warn('    Skipped: canonical, og:url, sitemap.xml and the robots Sitemap line.');
+  console.warn('    Set SITE_URL in .env to the live domain, then rebuild.');
+  console.warn('    Until then social previews and canonical signals are inert.');
   console.warn('');
 }
+
 
 /* ---------------- fetch ---------------- */
 
@@ -152,6 +161,7 @@ const SITE_NAME = 'Sakshi Gill';
 
 /** Turns every root-relative asset URL in a built page into an absolute one. */
 function absolutise(html) {
+  if (!knownSite) return html;
   return html
     .replace(/(content|href)="\/(?!\/)/g, `$1="${siteUrl}/`)
     .replace(/"(url|image)"\s*:\s*"\/(?!\/)/g, `"$1":"${siteUrl}/`);
@@ -181,11 +191,11 @@ function applyHead(
     .replace(/[ \t]*<meta name="twitter:[^"]*"[^>]*>\n?/g, '');
 
   const head = [
-    `<link rel="canonical" href="${esc(canonical)}" />`,
+    canonical && knownSite ? `<link rel="canonical" href="${esc(canonical)}" />` : '',
     `<meta property="og:title" content="${esc(title)}" />`,
     `<meta property="og:description" content="${esc(description)}" />`,
     `<meta property="og:type" content="${esc(type)}" />`,
-    `<meta property="og:url" content="${esc(canonical)}" />`,
+    canonical && knownSite ? `<meta property="og:url" content="${esc(canonical)}" />` : '',
     `<meta property="og:site_name" content="${SITE_NAME}" />`,
     `<meta property="og:locale" content="en_IN" />`,
     publishedTime
@@ -202,6 +212,7 @@ function applyHead(
   ]
     .filter(Boolean)
     .join('\n    ');
+
 
   out = out.replace('</head>', `    ${head}\n  </head>`);
 
@@ -396,28 +407,32 @@ if (existsSync(homeFile)) {
   console.log('  dist/index.html (absolute URLs)');
 }
 
-/* sitemap */
-const urls = [
-  {loc: `${siteUrl}/`, priority: '1.0'},
-  {loc: `${siteUrl}/blog`, priority: '0.8'},
-  ...posts.map((p) => ({loc: `${siteUrl}/blog/${p.slug}`, lastmod: p.date, priority: '0.6'})),
-];
+/* sitemap: a sitemap full of placeholder domains is worse than none */
+if (knownSite) {
+  const urls = [
+    {loc: `${siteUrl}/`, priority: '1.0'},
+    {loc: `${siteUrl}/blog`, priority: '0.8'},
+    ...posts.map((p) => ({loc: `${siteUrl}/blog/${p.slug}`, lastmod: p.date, priority: '0.6'})),
+  ];
 
-const sitemap =
-  '<?xml version="1.0" encoding="UTF-8"?>\n' +
-  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  urls
-    .map(
-      (u) =>
-        `  <url>\n    <loc>${esc(u.loc)}</loc>` +
-        (u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : '') +
-        `\n    <priority>${u.priority}</priority>\n  </url>`,
-    )
-    .join('\n') +
-  '\n</urlset>\n';
+  const sitemap =
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+    urls
+      .map(
+        (u) =>
+          `  <url>\n    <loc>${esc(u.loc)}</loc>` +
+          (u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : '') +
+          `\n    <priority>${u.priority}</priority>\n  </url>`,
+      )
+      .join('\n') +
+    '\n</urlset>\n';
 
-writeFileSync(join(dist, 'sitemap.xml'), sitemap);
-console.log('  dist/sitemap.xml');
+  writeFileSync(join(dist, 'sitemap.xml'), sitemap);
+  console.log('  dist/sitemap.xml');
+} else {
+  console.log('  dist/sitemap.xml skipped (no real SITE_URL)');
+}
 
 /* robots: the studio and any API routes must stay out of the index */
 const robots = [
@@ -426,8 +441,7 @@ const robots = [
   'Disallow: /admin',
   'Disallow: /admin/',
   '',
-  `Sitemap: ${siteUrl}/sitemap.xml`,
-  '',
+  ...(knownSite ? [`Sitemap: ${siteUrl}/sitemap.xml`, ''] : []),
 ].join('\n');
 writeFileSync(join(dist, 'robots.txt'), robots);
 console.log('  dist/robots.txt');

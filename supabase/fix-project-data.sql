@@ -39,7 +39,7 @@ set
 where key = 'gyanix-academy';
 
 update public.site_content
-set contact_email = 'divinesakshigmail.com@gmail.com'
+set contact_email = 'divinesakshi03@gmail.com'
 where id = 'main';
 
 -- The journey image slot pointed at /sakshi_portrait.jpg, a file that has never

@@ -47,7 +47,7 @@ export const profile = {
    * existing CSS line-break animation keeps working.
    */
   rotatingRoles: ["Marketer", "AI Creator", "Storyteller"],
-  email: "divinesakshigmail.com@gmail.com",
+  email: "divinesakshi03@gmail.com",
   /**
    * No phone number was available in the source material, so the phone row is
    * hidden rather than showing a fake number.
