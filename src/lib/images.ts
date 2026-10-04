@@ -100,11 +100,16 @@ export async function saveSiteImage(
   return {ok: true};
 }
 
-/** Resets a slot to the checked-in static asset that ships with the site. */
+/**
+ * Fallback shown when a slot has no upload yet. There is no bundled portrait in
+ * this repository - the two previous defaults (/sakshi_portrait.jpg and
+ * /Character_head_tracking_animation_*.jpeg) were never committed, so they
+ * rendered as broken images. Upload a real image from Admin Panel -> Images.
+ */
 export const SLOT_DEFAULTS: Record<ImageSlot, string> = {
-  hero: '/sakshi_portrait.jpg',
-  about: '/Character_head_tracking_animation_20260923172045.jpeg',
-  journey: '/sakshi_portrait.jpg',
+  hero: '',
+  about: '',
+  journey: '',
 };
 
 /**

@@ -12,7 +12,7 @@
 
 update public.projects
 set
-  kicker = 'Project 01 · Game',
+  kicker = 'Project 01 - Game',
   title = 'Typing Rush',
   url = 'https://typing-rush-game.vercel.app',
   beneficial_title = 'Why Typing Rush Is Beneficial',
@@ -26,7 +26,7 @@ where key = 'typing-rush';
 
 update public.projects
 set
-  kicker = 'Project 02 · Website',
+  kicker = 'Project 02 - Website',
   title = 'Gyanix Academy',
   url = 'https://gyanix-acedemy-gyanix-academy-8bqc.vercel.app',
   beneficial_title = 'Why Gyanix Academy Is Beneficial',
@@ -41,5 +41,21 @@ where key = 'gyanix-academy';
 update public.site_content
 set contact_email = 'divinesakshigmail.com@gmail.com'
 where id = 'main';
+
+-- The journey image slot pointed at /sakshi_portrait.jpg, a file that has never
+-- existed in this repository, so it rendered as a broken image. Fall back to the
+-- uploaded "about" portrait, or clear it so the slot uses its own default.
+update public.site_images
+set
+  url = coalesce(
+    (select url from public.site_images where slot = 'about' and storage_path <> ''),
+    ''
+  ),
+  storage_path = coalesce(
+    (select storage_path from public.site_images where slot = 'about' and storage_path <> ''),
+    ''
+  )
+where slot = 'journey'
+  and url = '/sakshi_portrait.jpg';
 
 notify pgrst, 'reload schema';
