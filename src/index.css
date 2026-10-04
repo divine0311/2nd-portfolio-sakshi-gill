@@ -75,6 +75,10 @@ body {
   margin: auto;
   position: relative;
 }
+/* Keeps the last section clear of the fixed FooterDock. */
+#smooth-content .container-main {
+  padding-bottom: 110px;
+}
 .container1 {
   width: var(--cWidth);
   height: var(--vh);

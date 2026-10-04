@@ -1,0 +1,230 @@
+/* ===========================================================================
+   My Toolkit - 3D animated icon cubes
+   Each tool is a real CSS cube (front + top + side face) that tilts toward the
+   cursor and floats on its own. Boxes carry an icon only; the name sits below
+   as a quiet caption.
+   ======================================================================== */
+
+.techstack {
+  width: 100%;
+  position: relative;
+  /* The original canvas layout pinned this to one viewport height. */
+  height: auto;
+  margin: 0 auto;
+  padding: 120px 0 140px;
+}
+
+.techstack h2 {
+  font-size: 80px;
+  text-align: center;
+  position: static;
+  width: 100%;
+  top: auto;
+  left: auto;
+  font-weight: 400;
+  text-transform: uppercase;
+  margin: 0;
+  background: linear-gradient(0deg, #7f40ff, #ffffff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.tool-subtitle {
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 620px;
+  margin: 18px auto 0;
+}
+
+.tool-group {
+  width: var(--cWidth);
+  max-width: var(--cMaxWidth);
+  margin: 0 auto;
+  padding-top: 80px;
+}
+
+.tool-group-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accentColor);
+  margin: 0 0 30px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(194, 164, 255, 0.22);
+}
+
+.tool-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 34px 26px;
+  /* Room for the cube's side/top faces and the hover lift. */
+  padding: 14px 4px 10px;
+}
+
+.tool-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 104px;
+}
+
+/* ---- The cube ---------------------------------------------------------- */
+.tool-cube {
+  --size: 88px;
+  --depth: 22px;
+
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  transform-style: preserve-3d;
+  cursor: pointer;
+  will-change: transform;
+}
+
+.tool-face {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size);
+  height: var(--size);
+  border: 1px solid rgba(194, 164, 255, 0.45);
+  background: linear-gradient(150deg, #2a1d4a 0%, #1b1130 100%);
+  backface-visibility: hidden;
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease;
+}
+
+/* Front face sits half the depth forward. */
+.tool-face-front {
+  transform: translateZ(calc(var(--depth) / 2));
+  z-index: 3;
+}
+
+/* Top face: tipped back 90 degrees. */
+.tool-face-top {
+  transform: rotateX(90deg) translateZ(calc(var(--depth) / 2));
+  background: linear-gradient(180deg, #4a327f 0%, #2a1d4a 100%);
+  border-color: rgba(194, 164, 255, 0.6);
+}
+
+/* Side face: swung right 90 degrees. */
+.tool-face-side {
+  transform: rotateY(90deg) translateZ(calc(var(--depth) / 2));
+  background: linear-gradient(90deg, #1f1536 0%, #120c26 100%);
+  border-color: rgba(194, 164, 255, 0.3);
+}
+
+/* Hover: brighter faces + a soft glow behind the cube. */
+.tool-cube:hover .tool-face-front {
+  background: linear-gradient(150deg, #7c3aed 0%, #3b1d7a 100%);
+  border-color: #ddd6fe;
+}
+.tool-cube:hover .tool-face-top {
+  background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%);
+  border-color: #ede9fe;
+}
+.tool-cube:hover .tool-face-side {
+  background: linear-gradient(90deg, #5b21b6 0%, #2a1d4a 100%);
+  border-color: #a78bfa;
+}
+.tool-cube:hover .tool-icon {
+  color: #ffffff;
+  transform: scale(1.12);
+}
+
+.tool-icon {
+  font-size: 34px;
+  color: var(--accentColor);
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
+}
+
+/* Caption under each box. */
+.tool-name {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+  line-height: 1.4;
+  transition: color 0.3s ease;
+}
+
+.tool-cube:hover + .tool-name {
+  color: var(--accentColor);
+}
+
+/* Screen-reader only helper text. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Responsive -------------------------------------------------------- */
+@media only screen and (max-width: 900px) {
+  .techstack {
+    padding: 90px 0 110px;
+  }
+  .techstack h2 {
+    font-size: 44px;
+  }
+  .tool-group {
+    padding-top: 60px;
+  }
+  .tool-group-label {
+    letter-spacing: 0.2em;
+  }
+  .tool-cell {
+    width: 84px;
+  }
+  .tool-cube {
+    --size: 72px;
+    --depth: 18px;
+  }
+  .tool-icon {
+    font-size: 28px;
+  }
+  .tool-grid {
+    gap: 26px 16px;
+    justify-content: flex-start;
+  }
+}
+
+@media only screen and (max-width: 900px) {
+  .techstack h2 {
+    font-size: 40px;
+  }
+}
+
+/* Touch devices get a tap-friendly highlight instead of cursor tilt. */
+@media (hover: none) {
+  .tool-cube:active .tool-face-front {
+    background: linear-gradient(150deg, #7c3aed 0%, #3b1d7a 100%);
+    border-color: #ddd6fe;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-cube,
+  .tool-face,
+  .tool-icon,
+  .tool-name {
+    transition: none;
+  }
+}

@@ -1,212 +1,228 @@
-import * as THREE from "three";
-import { useRef, useMemo, useState, useEffect } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
-import { EffectComposer, N8AO } from "@react-three/postprocessing";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import type { IconType } from "react-icons";
 import {
-  BallCollider,
-  Physics,
-  RigidBody,
-  CylinderCollider,
-  RapierRigidBody,
-} from "@react-three/rapier";
+  FaWandMagicSparkles,
+  FaFilm,
+  FaVideo,
+  FaArrowDown,
+  FaClapperboard,
+  FaCloud,
+  FaBolt,
+  FaPlay,
+  FaScissors,
+  FaSliders,
+  FaFileLines,
+} from "react-icons/fa6";
+import {
+  SiHubspot,
+  SiSemrush,
+  SiGoogleads,
+  SiMeta,
+  SiMailchimp,
+  SiOpenai,
+  SiGooglegemini,
+  SiAnthropic,
+  SiGooglecloud,
+  SiPerplexity,
+  SiAdobe,
+  SiDavinciresolve,
+  SiCanva,
+  SiInstagram,
+  SiFacebook,
+  SiYoutube,
+  SiX,
+  SiLinkedin,
+  SiPinterest,
+} from "react-icons/si";
+import { toolkitGroups } from "../data/sakshi";
+import "./styles/TechStack.css";
 
-const textureLoader = new THREE.TextureLoader();
-const imageUrls = [
-  "/images/react2.webp",
-  "/images/next2.webp",
-  "/images/node2.webp",
-  "/images/express.webp",
-  "/images/mongo.webp",
-  "/images/mysql.webp",
-  "/images/typescript.webp",
-  "/images/javascript.webp",
-];
-const textures = imageUrls.map((url) => textureLoader.load(url));
-
-const sphereGeometry = new THREE.SphereGeometry(1, 28, 28);
-
-const spheres = [...Array(30)].map(() => ({
-  scale: [0.7, 1, 0.8, 1, 1][Math.floor(Math.random() * 5)],
-}));
-
-type SphereProps = {
-  vec?: THREE.Vector3;
-  scale: number;
-  r?: typeof THREE.MathUtils.randFloatSpread;
-  material: THREE.MeshPhysicalMaterial;
-  isActive: boolean;
+/**
+ * Icons are imported by name rather than via `import * as` so the bundler can
+ * tree-shake the thousands of unused brand icons out of the build.
+ */
+const ICONS: Record<string, IconType> = {
+  FaWandMagicSparkles,
+  FaFilm,
+  FaVideo,
+  FaArrowDown,
+  FaClapperboard,
+  FaCloud,
+  FaBolt,
+  FaPlay,
+  FaScissors,
+  FaSliders,
+  FaFileLines,
+  SiHubspot,
+  SiSemrush,
+  SiGoogleads,
+  SiMeta,
+  SiMailchimp,
+  SiOpenai,
+  SiGooglegemini,
+  SiAnthropic,
+  SiGooglecloud,
+  SiPerplexity,
+  SiAdobe,
+  SiDavinciresolve,
+  SiCanva,
+  SiInstagram,
+  SiFacebook,
+  SiYoutube,
+  SiX,
+  SiLinkedin,
+  SiPinterest,
 };
 
-function SphereGeo({
-  vec = new THREE.Vector3(),
-  scale,
-  r = THREE.MathUtils.randFloatSpread,
-  material,
-  isActive,
-}: SphereProps) {
-  const api = useRef<RapierRigidBody | null>(null);
-
-  useFrame((_state, delta) => {
-    if (!isActive) return;
-    delta = Math.min(0.1, delta);
-    const impulse = vec
-      .copy(api.current!.translation())
-      .normalize()
-      .multiply(
-        new THREE.Vector3(
-          -50 * delta * scale,
-          -150 * delta * scale,
-          -50 * delta * scale
-        )
-      );
-
-    api.current?.applyImpulse(impulse, true);
-  });
-
-  return (
-    <RigidBody
-      linearDamping={0.75}
-      angularDamping={0.15}
-      friction={0.2}
-      position={[r(20), r(20) - 25, r(20) - 10]}
-      ref={api}
-      colliders={false}
-    >
-      <BallCollider args={[scale]} />
-      <CylinderCollider
-        rotation={[Math.PI / 2, 0, 0]}
-        position={[0, 0, 1.2 * scale]}
-        args={[0.15 * scale, 0.275 * scale]}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        scale={scale}
-        geometry={sphereGeometry}
-        material={material}
-        rotation={[0.3, 1, 1]}
-      />
-    </RigidBody>
-  );
-}
-
-type PointerProps = {
-  vec?: THREE.Vector3;
-  isActive: boolean;
-};
-
-function Pointer({ vec = new THREE.Vector3(), isActive }: PointerProps) {
-  const ref = useRef<RapierRigidBody>(null);
-
-  useFrame(({ pointer, viewport }) => {
-    if (!isActive) return;
-    const targetVec = vec.lerp(
-      new THREE.Vector3(
-        (pointer.x * viewport.width) / 2,
-        (pointer.y * viewport.height) / 2,
-        0
-      ),
-      0.2
-    );
-    ref.current?.setNextKinematicTranslation(targetVec);
-  });
-
-  return (
-    <RigidBody
-      position={[100, 100, 100]}
-      type="kinematicPosition"
-      colliders={false}
-      ref={ref}
-    >
-      <BallCollider args={[2]} />
-    </RigidBody>
-  );
-}
+const MAX_TILT = 16;
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, value));
 
 const TechStack = () => {
-  const [isActive, setIsActive] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const cubeRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  const totalBoxes = toolkitGroups.reduce(
+    (sum, group) => sum + group.items.length,
+    0,
+  );
+
+  // ---- Entrance: stagger the cubes up as the section scrolls into view ----
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY || document.documentElement.scrollTop;
-      const threshold = document
-        .getElementById("work")!
-        .getBoundingClientRect().top;
-      setIsActive(scrollY > threshold);
-    };
-    document.querySelectorAll(".header a").forEach((elem) => {
-      const element = elem as HTMLAnchorElement;
-      element.addEventListener("click", () => {
-        const interval = setInterval(() => {
-          handleScroll();
-        }, 10);
-        setTimeout(() => {
-          clearInterval(interval);
-        }, 1000);
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        ".tool-group",
+        { autoAlpha: 0, y: 40 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.9,
+          ease: "power3.out",
+          stagger: 0.12,
+          scrollTrigger: { trigger: sectionRef.current, start: "top 85%" },
+        },
+      );
+
+      gsap.fromTo(
+        ".tool-cube",
+        { autoAlpha: 0, y: 60, scale: 0.6, rotateX: -40 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          rotateX: 0,
+          duration: 0.7,
+          ease: "back.out(1.7)",
+          stagger: { each: 0.03, grid: "auto", from: "start" },
+          scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
+        },
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // ---- Idle float so the cubes feel alive without a cursor ---------------
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      cubeRefs.current.forEach((cube, index) => {
+        if (!cube) return;
+        gsap.to(cube, {
+          y: -9,
+          duration: 1.6 + (index % 5) * 0.22,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          delay: (index % 7) * 0.16,
+        });
       });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // ---- Hover tilt, driven from refs so React never re-renders -------------
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "touch") return;
+    const box = event.currentTarget;
+    const rect = box.getBoundingClientRect();
+
+    const x = (event.clientX - rect.left) / rect.width - 0.5;
+    const y = (event.clientY - rect.top) / rect.height - 0.5;
+
+    gsap.to(box, {
+      rotateY: clamp(x * 22, -MAX_TILT, MAX_TILT),
+      rotateX: clamp(-y * 22, -MAX_TILT, MAX_TILT),
+      z: 34,
+      duration: 0.45,
+      ease: "power3.out",
+      overwrite: "auto",
     });
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-  const materials = useMemo(() => {
-    return textures.map(
-      (texture) =>
-        new THREE.MeshPhysicalMaterial({
-          map: texture,
-          emissive: "#ffffff",
-          emissiveMap: texture,
-          emissiveIntensity: 0.3,
-          metalness: 0.5,
-          roughness: 1,
-          clearcoat: 0.1,
-        })
-    );
-  }, []);
+  };
+
+  const handlePointerLeave = (event: React.PointerEvent<HTMLDivElement>) => {
+    gsap.to(event.currentTarget, {
+      rotateY: 0,
+      rotateX: 0,
+      z: 0,
+      duration: 0.8,
+      ease: "elastic.out(1, 0.5)",
+      overwrite: "auto",
+    });
+  };
+
+  let cubeIndex = 0;
 
   return (
-    <div className="techstack">
-      <h2> My Techstack</h2>
+    <div className="techstack" id="toolkit" ref={sectionRef}>
+      <h2>My Toolkit</h2>
+      <p className="tool-subtitle">
+        Everything behind the work — marketing, AI, video, editing and social.
+      </p>
 
-      <Canvas
-        shadows
-        gl={{ alpha: true, stencil: false, depth: false, antialias: false }}
-        camera={{ position: [0, 0, 20], fov: 32.5, near: 1, far: 100 }}
-        onCreated={(state) => (state.gl.toneMappingExposure = 1.5)}
-        className="tech-canvas"
-      >
-        <ambientLight intensity={1} />
-        <spotLight
-          position={[20, 20, 25]}
-          penumbra={1}
-          angle={0.2}
-          color="white"
-          castShadow
-          shadow-mapSize={[512, 512]}
-        />
-        <directionalLight position={[0, 5, -4]} intensity={2} />
-        <Physics gravity={[0, 0, 0]}>
-          <Pointer isActive={isActive} />
-          {spheres.map((props, i) => (
-            <SphereGeo
-              key={i}
-              {...props}
-              material={materials[Math.floor(Math.random() * materials.length)]}
-              isActive={isActive}
-            />
-          ))}
-        </Physics>
-        <Environment
-          files="/models/char_enviorment.hdr"
-          environmentIntensity={0.5}
-          environmentRotation={[0, 4, 2]}
-        />
-        <EffectComposer enableNormalPass={false}>
-          <N8AO color="#0f002c" aoRadius={2} intensity={1.15} />
-        </EffectComposer>
-      </Canvas>
+      {toolkitGroups.map((group) => (
+        <div className="tool-group" key={group.label}>
+          <h3 className="tool-group-label">{group.label}</h3>
+
+          <div className="tool-grid">
+            {group.items.map((item) => {
+              const Icon = ICONS[item.icon];
+              const index = cubeIndex++;
+
+              return (
+                <div className="tool-cell" key={item.name}>
+                  <div
+                    className="tool-cube"
+                    ref={(node) => {
+                      cubeRefs.current[index] = node;
+                    }}
+                    onPointerMove={handlePointerMove}
+                    onPointerLeave={handlePointerLeave}
+                    data-cursor="disable"
+                    aria-label={item.name}
+                    title={item.name}
+                    role="img"
+                  >
+                    {/* Front, top and side faces make a real 3D cube. */}
+                    <span className="tool-face tool-face-front">
+                      {Icon ? <Icon className="tool-icon" /> : null}
+                    </span>
+                    <span className="tool-face tool-face-top" aria-hidden="true" />
+                    <span
+                      className="tool-face tool-face-side"
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <span className="tool-name">{item.name}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      <span className="sr-only">{totalBoxes} tools in the toolkit.</span>
     </div>
   );
 };

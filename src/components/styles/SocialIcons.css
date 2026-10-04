@@ -10,7 +10,8 @@
 .social-icons {
   position: absolute;
   left: -20px;
-  bottom: 20px;
+  /* Raised to clear the fixed FooterDock. */
+  bottom: 110px;
   display: none;
   flex-direction: column;
   gap: 8px;
@@ -48,7 +49,8 @@
   z-index: 99;
   display: flex;
   gap: 5px;
-  bottom: 40px;
+  /* Raised to clear the fixed FooterDock. */
+  bottom: 110px;
   right: 0;
   width: auto;
   text-wrap: nowrap;

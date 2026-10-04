@@ -1,0 +1,158 @@
+.footer-dock {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  /* The dock must never swallow clicks meant for the hero / 3D canvas. */
+  pointer-events: none;
+}
+
+.dock-list {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  perspective: 400px;
+}
+
+.dock-tile-wrap {
+  perspective: 400px;
+}
+
+.dock-tile {
+  position: relative;
+  width: 66px;
+  height: 66px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-sizing: border-box;
+  /* Square, no rounding. */
+  border-radius: 0;
+  border: 1px solid #6d4fc2;
+  background: #2a1d4a;
+  color: #a78bfa;
+  cursor: pointer;
+  text-decoration: none;
+  overflow: hidden;
+  pointer-events: auto;
+  /* Tilt is written from JS on mousemove; transition keeps it ~150ms ease-out. */
+  transition:
+    transform 150ms ease-out,
+    background-color 250ms ease,
+    border-color 250ms ease,
+    color 250ms ease;
+}
+
+.dock-tile:hover {
+  border-color: #a78bfa;
+  color: #ddd6fe;
+}
+
+.dock-tile[data-active="true"] {
+  background: #7c3aed;
+  border-color: #ddd6fe;
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   Watching eyes
+-------------------------------------------------------------------------- */
+.dock-eyes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dock-eye {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ede9fe;
+  /* Pupil max offset (4px) + pupil radius (3.5px) stays inside the 8px radius. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dock-pupil {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #120a24;
+  will-change: transform;
+}
+
+.dock-tile[data-active="true"] .dock-eye {
+  background: #ffffff;
+}
+
+.dock-icon {
+  font-size: 17px;
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Caption
+-------------------------------------------------------------------------- */
+.dock-caption {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #a78bfa;
+  font-weight: 500;
+  height: 14px;
+  line-height: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Narrow screens: shrink so all six tiles still fit comfortably. */
+@media only screen and (max-width: 640px) {
+  .dock-list {
+    gap: 8px;
+  }
+  .dock-tile {
+    width: 48px;
+    height: 48px;
+    gap: 5px;
+  }
+  .dock-icon {
+    font-size: 15px;
+  }
+  .dock-eyes {
+    gap: 6px;
+  }
+  .dock-eye {
+    width: 13px;
+    height: 13px;
+  }
+  .dock-pupil {
+    width: 6px;
+    height: 6px;
+  }
+  .dock-caption {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-tile {
+    transition:
+      background-color 250ms ease,
+      border-color 250ms ease,
+      color 250ms ease;
+  }
+}

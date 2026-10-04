@@ -7,7 +7,16 @@ import {
 import "./styles/SocialIcons.css";
 import { TbNotes } from "react-icons/tb";
 import { useEffect } from "react";
+import { profile } from "../data/sakshi";
 import HoverLinks from "./HoverLinks";
+
+/** Rows are filtered by URL, so icons without a real link never render. */
+const socials = [
+  { label: "Github", href: profile.github, icon: <FaGithub /> },
+  { label: "Linkedin", href: profile.linkedin, icon: <FaLinkedinIn /> },
+  { label: "Twitter", href: profile.x, icon: <FaXTwitter /> },
+  { label: "Instagram", href: profile.instagram, icon: <FaInstagram /> },
+].filter((social) => Boolean(social.href));
 
 const SocialIcons = () => {
   useEffect(() => {
@@ -59,33 +68,22 @@ const SocialIcons = () => {
   return (
     <div className="icons-section">
       <div className="social-icons" data-cursor="icons" id="social">
-        <span>
-          <a href="https://github.com" target="_blank">
-            <FaGithub />
-          </a>
-        </span>
-        <span>
-          <a href="https://www.linkedin.com" target="_blank">
-            <FaLinkedinIn />
-          </a>
-        </span>
-        <span>
-          <a href="https://x.com" target="_blank">
-            <FaXTwitter />
-          </a>
-        </span>
-        <span>
-          <a href="https://www.instagram.com" target="_blank">
-            <FaInstagram />
-          </a>
-        </span>
+        {socials.map((social) => (
+          <span key={social.label}>
+            <a href={social.href} target="_blank" rel="noopener noreferrer">
+              {social.icon}
+            </a>
+          </span>
+        ))}
       </div>
-      <a className="resume-button" href="#">
-        <HoverLinks text="RESUME" />
-        <span>
-          <TbNotes />
-        </span>
-      </a>
+      {profile.resumeUrl && (
+        <a className="resume-button" href={profile.resumeUrl} target="_blank" rel="noopener noreferrer">
+          <HoverLinks text="RESUME" />
+          <span>
+            <TbNotes />
+          </span>
+        </a>
+      )}
     </div>
   );
 };

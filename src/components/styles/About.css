@@ -30,6 +30,55 @@
   letter-spacing: 1px;
 }
 
+/* Vision block sits opposite the story on wide screens. */
+.about-vision {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 50px 0px 0px;
+  width: 42%;
+  max-width: calc(100% - 15px);
+}
+
+.about-vision h4 {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-weight: 400;
+  color: var(--accentColor);
+}
+
+.about-vision h3 {
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+.about-vision p {
+  font-size: 17px;
+  line-height: 1.65;
+  color: #cfc9d4;
+}
+
+.about-signoff {
+  margin-top: 6px;
+  font-size: 14px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accentColor);
+}
+
+@media only screen and (min-width: 1025px) {
+  .about-vision {
+    padding: 0px;
+    width: 42%;
+  }
+  .about-vision h3 {
+    font-size: 2vw;
+  }
+}
+
 @media only screen and (min-width: 600px) {
   .about-section {
     justify-content: center;

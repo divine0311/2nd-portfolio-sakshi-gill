@@ -1,0 +1,298 @@
+.connect-section {
+  position: relative;
+  margin: auto;
+  padding: 40px 0 140px;
+  width: var(--cWidth);
+  max-width: var(--cMaxWidth);
+}
+
+.connect-title {
+  font-size: 70px;
+  line-height: 70px;
+  font-weight: 400;
+  text-align: center;
+  background: linear-gradient(0deg, #7f40ff, #ffffff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  margin: 0 0 70px;
+}
+
+/* ---------------------------------------------------------------------------
+   3D box
+   The face sits inside a perspective wrapper and is tilted from JS on mouse
+   move, so the parallax stays smooth instead of fighting CSS transitions.
+--------------------------------------------------------------------------- */
+.connect-3d {
+  perspective: 1400px;
+  display: flex;
+  justify-content: center;
+}
+
+.connect-box {
+  position: relative;
+  width: min(860px, 100%);
+  padding: 56px 52px;
+  border-radius: 26px;
+  transform-style: preserve-3d;
+  background: linear-gradient(150deg, #7f40ff 0%, #2b0f66 55%, #0b080c 100%);
+  box-shadow:
+    0 30px 60px -24px rgba(127, 64, 255, 0.55),
+    0 8px 18px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  will-change: transform;
+}
+
+/* Soft sheen that drifts across the face, echoing the site's glassy look. */
+.connect-box::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(255, 255, 255, 0.22),
+    transparent
+  );
+  transform: skewX(-15deg);
+  animation: connectSweep 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes connectSweep {
+  0%,
+  100% {
+    left: -60%;
+  }
+  50% {
+    left: 120%;
+  }
+}
+
+.connect-box-inner {
+  position: relative;
+  z-index: 1;
+  transform: translateZ(40px);
+}
+
+/* ---------------------------------------------------------------------------
+   Vision sits above the 3D box as plain page copy, not on the box face.
+--------------------------------------------------------------------------- */
+.connect-vision {
+  max-width: 780px;
+  margin: 0 auto 70px;
+  text-align: center;
+}
+
+.connect-kicker {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accentColor);
+  margin-bottom: 18px;
+}
+
+.connect-headline {
+  font-size: clamp(28px, 3.4vw, 46px);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.5px;
+  margin: 0 0 22px;
+}
+
+.connect-vision-text {
+  font-size: 17px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0 0 30px;
+}
+
+.connect-quotes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.connect-quotes li {
+  position: relative;
+  padding-left: 22px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.66);
+  font-style: italic;
+}
+
+.connect-quotes li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accentColor);
+}
+
+/* ---------------------------------------------------------------------------
+   Form
+--------------------------------------------------------------------------- */
+/* Now the first child on the box face, so no divider on top. */
+.connect-direct {
+  margin-bottom: 34px;
+}
+
+.connect-direct h4 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin: 0 0 14px;
+}
+
+.connect-direct-email {
+  display: inline-block;
+  font-size: clamp(19px, 2vw, 28px);
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+  padding-bottom: 4px;
+  margin-bottom: 24px;
+  word-break: break-word;
+  color: #ffffff;
+}
+
+.connect-direct-email:hover {
+  border-bottom-color: #ffffff;
+}
+
+.connect-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+}
+
+a.connect-social {
+  font-size: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+  padding-bottom: 2px;
+  width: fit-content;
+}
+
+a.connect-social:hover {
+  border-bottom-color: #ffffff;
+}
+
+.connect-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.connect-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.connect-field-full {
+  grid-column: 1 / -1;
+}
+
+.connect-field label {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.connect-field input,
+.connect-field textarea {
+  font-family: inherit;
+  font-size: 16px;
+  color: #ffffff;
+  /* Dark translucent fill so the text reads clearly on the purple face. */
+  background: rgba(11, 8, 12, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 12px;
+  padding: 13px 16px;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+  /* The site disables text selection globally; keep form fields usable. */
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.connect-field textarea {
+  resize: vertical;
+  min-height: 128px;
+  line-height: 1.6;
+}
+
+.connect-field input:focus,
+.connect-field textarea:focus {
+  border-color: #ffffff;
+  background: rgba(11, 8, 12, 0.5);
+}
+
+.connect-submit {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-top: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #0b080c;
+  background: #ffffff;
+  border: none;
+  border-radius: 999px;
+  padding: 15px 42px;
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s ease;
+  box-shadow: 0 8px 24px -8px rgba(194, 164, 255, 0.7);
+}
+
+.connect-submit:hover {
+  transform: scale(1.04);
+  box-shadow: 0 12px 32px -8px rgba(194, 164, 255, 0.85);
+}
+
+.connect-status {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  color: var(--accentColor);
+  min-height: 20px;
+}
+
+@media (max-width: 700px) {
+  .connect-title {
+    font-size: 40px;
+    line-height: 42px;
+    margin-bottom: 44px;
+  }
+  .connect-box {
+    padding: 36px 24px;
+  }
+  .connect-form {
+    grid-template-columns: 1fr;
+  }
+  .connect-section {
+    padding-bottom: 90px;
+  }
+}

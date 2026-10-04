@@ -13,6 +13,9 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    /* Restricts ambient @types to the DOM so app code keeps browser semantics
+       (e.g. setTimeout returns number, not Node's Timeout). */
+    "types": ["vite/client"],
 
     /* Linting */
     "strict": true,
