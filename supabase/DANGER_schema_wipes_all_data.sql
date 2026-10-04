@@ -144,7 +144,7 @@ insert into public.site_content (
   $$The pivotal breakthrough — fusing strategic brand storytelling with cutting-edge AI tools to design high-impact, forward-looking content.$$,
   $$$$,
   $$["\"Creativity is no longer just intuition; it is amplified imagination guided by data.\"","\"The boldest stories are written by those willing to dismantle yesterday’s assumptions.\"","Every phase of my progression has been shaped by an obsession with mastery: diving into emerging AI tools before they became mainstream, deconstructing what makes narrative stick, and constantly testing new creative frameworks. Growth is not an accident — it is an intentional, relentless practice."]$$::jsonb,
-  $$divinesakshi03gmail.com@gmail.com$$,
+  $$divinesakshigmail.com@gmail.com$$,
   $$$$,
   $$https://www.linkedin.com/in/sakshigill$$
 )

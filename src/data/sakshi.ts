@@ -47,7 +47,7 @@ export const profile = {
    * existing CSS line-break animation keeps working.
    */
   rotatingRoles: ["Marketer", "AI Creator", "Storyteller"],
-  email: "gillsakshi22@gmail.com",
+  email: "divinesakshigmail.com@gmail.com",
   /**
    * No phone number was available in the source material, so the phone row is
    * hidden rather than showing a fake number.
@@ -115,30 +115,28 @@ export const projects: Project[] = [
     category: "Live Game",
     url: "https://typing-rush-game.vercel.app",
     summary:
-      "A fast-paced browser typing sprint that measures real-time keystroke velocity and accuracy.",
+      "A neon sci-fi typing shooter: incoming enemy ships are destroyed by typing the words on them.",
     highlights: [
-      "Reflex & Speed: sharpens hand-eye coordination and lifts keystroke velocity under real-time constraints.",
-      "Accuracy & Muscle Memory: trains instinctive touch-typing to cut typos in daily writing and code.",
-      "Focus & Flow: sprint rounds demand presence and condition mental endurance.",
-      "Live Benchmark Metrics: real-time WPM analytics and multiplier streaks make progress measurable.",
+      "Type to Destroy: every ship dies only when its word is typed correctly, so speed and accuracy decide the round.",
+      "Neon Arcade Look: canvas-rendered enemies, particle bursts and a retro-futuristic HUD.",
+      "Zero Install: runs entirely in the browser, so it opens straight on desktop and mobile.",
     ],
-    tools: ["React", "TypeScript", "Real-time WPM Engine", "Streak Logic"],
-    image: "/images/placeholder.webp",
+    tools: ["React", "TypeScript", "Canvas Game Loop", "Typing Engine"],
+    image: "/images/work-typing-rush.webp",
   },
   {
     title: "Gyanix Academy",
-    category: "Website",
+    category: "Coaching Institute Website",
     url: "https://gyanix-acedemy-gyanix-academy-8bqc.vercel.app",
     summary:
-      "An educational web platform teaching generative AI tools and full-funnel digital marketing through self-paced tracks.",
+      "Kaithal's 5.0-rated coaching institute for IIT-JEE, NEET, NDA and Defence exams - courses, results, faculty and enquiries in one place.",
     highlights: [
-      "In-Demand AI Curriculum: generative AI tooling, full-funnel marketing, and content systems.",
-      "Job & Client Readiness: actionable portfolio projects over passive theory.",
-      "Self-Paced Learning: modular tracks for students and busy professionals.",
-      "High-Speed UX: lightweight, responsive design with frictionless mobile navigation.",
+      "Trust Above The Fold: 5.0 Google rating and 84+ Justdial reviews surfaced where enquiry visitors land.",
+      "Results That Sell: district and state ranks, prize ceremonies and Amar Ujala press coverage as proof.",
+      "Enquiry Built In: WhatsApp and enquiry CTAs alongside courses, G-SET scholarship, hostel and faculty details.",
     ],
-    tools: ["Generative AI", "Content Systems", "Funnel Design", "Responsive UI"],
-    image: "/images/placeholder.webp",
+    tools: ["Responsive UI", "SEO Basics", "Lead Generation", "Google Reviews"],
+    image: "/images/work-gyanix-academy.webp",
   },
 ];
 

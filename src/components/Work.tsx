@@ -18,7 +18,7 @@ const Work = () => {
       .getBoundingClientRect().left;
     const rect = box[0].getBoundingClientRect();
     const parentWidth = box[0].parentElement!.getBoundingClientRect().width;
-    let padding: number =
+    const padding: number =
       parseInt(window.getComputedStyle(box[0]).padding) / 2;
     translateX = rect.width * box.length - (rectLeft + parentWidth) + padding;
   }
@@ -30,7 +30,7 @@ const Work = () => {
   // horizontal scroll in that case and let the section flow normally.
   if (translateX <= 0) return;
 
-  let timeline = gsap.timeline({
+  const timeline = gsap.timeline({
     scrollTrigger: {
       trigger: ".work-section",
       start: "top top",
@@ -66,6 +66,7 @@ const Work = () => {
               href={project.url}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label={`${project.title} - open live site`}
             >
               <div className="work-info">
                 <div className="work-title">
@@ -76,10 +77,15 @@ const Work = () => {
                     <p>{project.category}</p>
                   </div>
                 </div>
+                <p className="work-summary">{project.summary}</p>
                 <h4>Tools and features</h4>
                 <p>{project.tools.join(", ")}</p>
               </div>
-              <WorkImage image={project.image} alt="" />
+              <WorkImage
+                image={project.image}
+                alt={`${project.title} live preview`}
+                link={project.url}
+              />
             </a>
           ))}
         </div>

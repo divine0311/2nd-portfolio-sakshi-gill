@@ -85,6 +85,16 @@
 .work-info > p {
   width: 90%;
 }
+/* One real sentence about the project, clamped so a long line can never push
+   the pinned 100vh section into overflow. */
+.work-summary {
+  margin-bottom: 18px !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .work-image {
   display: flex;
   width: 100%;
@@ -110,10 +120,7 @@
   transition: 0.3s;
   opacity: 0;
 }
-.work-image a:hover {
-  color: inherit;
-}
-.work-image a:hover .work-link {
+.work-box:hover .work-link {
   opacity: 1;
 }
 .work-image video {
