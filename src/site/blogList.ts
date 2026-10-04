@@ -18,6 +18,8 @@ import {
   categoryStyle,
 } from './blogSeed';
 import {renderFooter} from './blogFooter';
+import {mountSiteNav} from './siteNav';
+import {mountRobot} from './blogRobot';
 
 const app = document.getElementById('app') as HTMLElement;
 
@@ -29,7 +31,6 @@ let posts: BlogPost[] = BLOG_SEED.slice();
 let cat = 'All';
 let q = '';
 let page = 1;
-let firstRender = true;
 
 const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -125,8 +126,9 @@ function list(): void {
   const liveCount = posts.filter(isPublished).length;
   const catCount = new Set(posts.filter(isPublished).map((p) => p.category).filter(Boolean)).size;
 
-  app.innerHTML =
-    `<header class="${firstRender ? 'go' : ''}">` +
+app.innerHTML =
+    '<header class="blog-hero">' +
+    "<div class=\"blog-hero-in go\">" +
     "<div class=\"label\">Kaithal's Trusted Digital Marketing Voice</div>" +
     '<h1 class="hero serif">Learn. Create. Grow.</h1>' +
     '<p class="lede">Insights on AI-powered marketing, content strategy, and creative tools — from Kaithal’s digital marketing specialist.</p>' +
@@ -134,7 +136,10 @@ function list(): void {
     `<div class="stat"><b>${liveCount}</b><span>Articles</span></div>` +
     `<div class="stat"><b>${catCount}</b><span>Categories</span></div>` +
     '<div class="stat"><b>AI</b><span>Powered</span></div>' +
-    '</div></header>' +
+    '</div></div>' +
+    // Empty marker for the home page's robot; blogRobot.ts builds it once.
+    '<div class="hero-slot" data-hero-slot></div>' +
+    '</header>' +
     `<input id="q" class="search" type="search" placeholder="Search articles" value="${escapeHtml(q)}" aria-label="Search articles">` +
     `<div class="pills" role="group" aria-label="Filter by category">${pills}</div>` +
     `<p class="count">${all.length} article${all.length === 1 ? '' : 's'} published</p>` +
@@ -157,9 +162,20 @@ function list(): void {
     `<button class="btn" type="button" onclick="location.href='${LINKS.contact}'">Get in touch</button>` +
     '</section>';
 
-  firstRender = false;
+  placeRobot();
   document.title = LIST_TITLE;
   setMeta(LIST_DESC);
+}
+
+/**
+ * `app.innerHTML` is rewritten on every filter, search and page change, so the
+ * robot host (built once by blogRobot.ts) is moved back into the fresh hero slot
+ * each time instead of being rebuilt.
+ */
+function placeRobot(): void {
+  const host = document.getElementById('blog-robot');
+  const slot = app.querySelector('[data-hero-slot]');
+  if (host && slot && slot.firstElementChild !== host) slot.appendChild(host);
 }
 
 /* ---------- interactions ---------- */
@@ -270,6 +286,8 @@ window.addEventListener(
 /* ---------- boot ---------- */
 
 async function boot(): Promise<void> {
+  mountSiteNav();
+  mountRobot();
   list();
   try {
     const rows = await loadBlogPosts();

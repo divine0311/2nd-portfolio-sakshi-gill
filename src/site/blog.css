@@ -22,6 +22,13 @@
   --violet: #7f40ff;
   --violet-deep: #2b0f66;
 
+  /* Consumed by the shared navbar (src/components/styles/Navbar.css), which is
+     written for the home page. Same values as src/index.css. */
+  --accentColor: #c2a4ff;
+  --backgroundColor: #0b080c;
+  --cWidth: calc(100% - 30px);
+  --cMaxWidth: 1920px;
+
   box-sizing: border-box;
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -53,11 +60,36 @@ body.blog-body {
 .blog-wrap {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 56px 20px 64px;
+  /* Clears the fixed navbar. */
+  padding: 104px 20px 64px;
 }
 
 .blog-wrap > header {
   text-align: center;
+}
+
+/* Hero: copy on the left, the robot on the right once there is room. */
+.blog-hero-in {
+  position: relative;
+  z-index: 2;
+}
+
+@media (min-width: 1024px) {
+  .blog-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 40px;
+    align-items: center;
+    text-align: left;
+  }
+
+  .blog-hero .lede {
+    margin-left: 0;
+  }
+
+  .blog-hero .stats {
+    justify-content: flex-start;
+  }
 }
 
 .label {
@@ -124,24 +156,32 @@ h1.hero {
   z-index: 20;
 }
 
-/* ---------- sticky nav ---------- */
+/* ---------- shared navbar (src/components/Navbar) ---------- */
 
-.nav {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: rgba(11, 8, 12, 0.82);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--line);
+/*
+ * The blog has no nav markup of its own: #site-nav is filled with the same
+ * React header the home page renders, so the logo, the Blog link and the email
+ * are identical on every page.
+ */
+#site-nav .header {
+  padding-top: 26px;
 }
 
-.nav-in {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 14px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+#site-nav .header a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+#site-nav .header a:hover {
+  color: var(--accent);
+}
+
+#site-nav .navbar-blog[aria-current='page'] {
+  color: var(--accent);
+}
+
+#site-nav .navbar-connect {
+  overflow-wrap: anywhere;
 }
 
 .brand {
@@ -152,23 +192,42 @@ h1.hero {
   letter-spacing: -0.2px;
 }
 
-.links a {
-  margin-left: 22px;
-  font-size: 14px;
-  color: var(--muted);
-  text-decoration: none;
-  padding-bottom: 3px;
-  transition: color 0.25s ease;
+/* ---------- the robot from the home page ---------- */
+
+.blog-robot {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
 }
 
-.links a:hover {
-  color: var(--accent);
+.blog-robot.is-ready {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.links a.on {
-  color: #ffffff;
-  font-weight: 600;
-  border-bottom: 2px solid var(--accent);
+/* Phones and small tablets: the hero is a single column and the model is 1.5MB. */
+.blog-robot.is-off {
+  display: none;
+}
+
+.blog-robot canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-slot {
+  position: relative;
+}
+
+@media (max-width: 1023px) {
+  .hero-slot {
+    display: none;
+  }
 }
 
 /* ---------- search + pills + count ---------- */
@@ -666,8 +725,36 @@ footer.site {
 /* ---------- post view ---------- */
 
 article {
-  max-width: 680px;
+  max-width: 1100px;
   margin: 0 auto;
+}
+
+/* Post header: the gradient card, with the robot beside it on wide screens. */
+.post-hero {
+  display: grid;
+  gap: 32px;
+  align-items: center;
+  margin-bottom: 36px;
+}
+
+@media (min-width: 1024px) {
+  .post-hero {
+    grid-template-columns: minmax(0, 680px) 320px;
+    justify-content: center;
+  }
+}
+
+.post-hero .ph {
+  margin-bottom: 0;
+}
+
+/* The reading column stays 680px wide even though the article box is wider. */
+.prose,
+article > .cta,
+article > .author {
+  width: min(680px, 100%);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .back {
@@ -859,7 +946,7 @@ article p {
 .arrs button:focus-visible,
 .search:focus-visible,
 .btn:focus-visible,
-.links a:focus-visible {
+#site-nav .header a:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
@@ -877,8 +964,7 @@ article p {
 }
 
 @media (max-width: 560px) {
-  .blog-wrap { padding-top: 36px; }
-  .links a { margin-left: 14px; font-size: 13px; }
+  .blog-wrap { padding-top: 84px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

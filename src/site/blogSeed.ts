@@ -43,7 +43,7 @@ export const LINKS = {
   blog: '/blog',
   services: '/#capabilities',
   contact: '/#connect',
-  email: 'gillsakshi22@gmail.com',
+  email: 'divinesakshigmail.com@gmail.com',
 };
 
 type SeedRow = (typeof seed.posts)[number];

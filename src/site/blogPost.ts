@@ -10,6 +10,8 @@ import {loadBlogPosts} from '../lib/content';
 import type {BlogPost} from '../lib/content';
 import {AUTHOR, BLOG_SEED, LINKS, categoryGlyph, categoryStyle} from './blogSeed';
 import {renderFooter} from './blogFooter';
+import {mountSiteNav} from './siteNav';
+import {mountRobot} from './blogRobot';
 
 const main = document.getElementById('post') as HTMLElement;
 const slug = decodeURIComponent(location.pathname.replace(/^\/blog\/?|\/$/g, ''));
@@ -159,11 +161,15 @@ function render(): void {
     categoryStyle(p.category) +
     '">' +
     '<button class="back" type="button">← Back to Blog</button>' +
+    '<div class="post-hero">' +
     '<header class="ph">' +
     `<span class="cat">${escapeHtml(p.category || 'Article')}</span>` +
     `<h1>${escapeHtml(p.title)}</h1>` +
     `<p>${escapeHtml(p.read_time || '')} • ${escapeHtml(p.author || AUTHOR)} • ${escapeHtml(prettyDate(dateOf(p)))}</p>` +
     '</header>' +
+    // Empty marker for the home page's robot; blogRobot.ts builds it once.
+    '<div class="hero-slot" data-hero-slot></div>' +
+    '</div>' +
     `<div class="prose">${bodyOf(p)}</div>` +
     '<div class="cta">Like this? I write about AI, marketing and creative tools every week. ' +
     `Read more at <a href="${LINKS.blog}">the blog</a>.</div>` +
@@ -185,6 +191,18 @@ function render(): void {
     '<p>Tell me what you are building and we can plan it together.</p>' +
     `<button class="btn" type="button" onclick="location.href='${LINKS.contact}'">Get in touch</button>` +
     '</section>';
+
+  placeRobot();
+}
+
+/**
+ * The article markup is re-rendered once the Supabase row arrives, so the robot
+ * host (built once by blogRobot.ts) is moved back into the fresh hero slot.
+ */
+function placeRobot(): void {
+  const host = document.getElementById('blog-robot');
+  const slot = main.querySelector('[data-hero-slot]');
+  if (host && slot && slot.firstElementChild !== host) slot.appendChild(host);
 }
 
 main.addEventListener('click', (e) => {
@@ -236,6 +254,8 @@ function onScroll(): void {
 window.addEventListener('scroll', onScroll, {passive: true});
 
 async function boot(): Promise<void> {
+  mountSiteNav();
+  mountRobot();
   render();
   onScroll();
   try {

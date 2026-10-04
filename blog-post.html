@@ -17,17 +17,11 @@
   <body class="blog-body">
     <div class="prog" id="prog" aria-hidden="true"></div>
 
-    <nav class="nav" aria-label="Main">
-      <div class="nav-in">
-        <a class="brand" href="/#landingDiv">Sakshi Gill</a>
-        <div class="links">
-          <a href="/#landingDiv">Home</a>
-          <a href="/#capabilities">Services</a>
-          <a class="on" href="/blog" aria-current="page">Blog</a>
-          <a href="/#connect">Contact</a>
-        </div>
-      </div>
-    </nav>
+    <!-- The site's own navbar, mounted by src/site/siteNav.tsx. -->
+    <div id="site-nav"></div>
+
+    <!-- The home page's robot; moved into the hero slot of the active view. -->
+    <div class="blog-robot" id="blog-robot" aria-hidden="true"></div>
 
     <main id="post" class="blog-wrap">
       <p class="empty">Loading…</p>
