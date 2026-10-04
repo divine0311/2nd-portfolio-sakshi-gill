@@ -26,12 +26,12 @@ export function renderFooter(): void {
   el.innerHTML =
     '<div class="ft">' +
     '<div class="ft-brand">' +
-    '<a class="brand" href="/#home">Sakshi Gill</a>' +
+    '<a class="brand" href="/#landingDiv">Sakshi Gill</a>' +
     '<p>Digital marketer, content creator and AI specialist helping local businesses get found online and grow with AI-powered content.</p>' +
     '</div>' +
     '<div>' +
     '<h4>Explore</h4>' +
-    '<a href="/#home">Home</a>' +
+    '<a href="/#landingDiv">Home</a>' +
     '<a href="/#capabilities">Services</a>' +
     '<a href="/blog">Blog</a>' +
     '</div>' +

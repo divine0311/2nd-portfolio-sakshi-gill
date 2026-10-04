@@ -99,8 +99,8 @@ function applyHead(p: BlogPost): void {
     articleSection: p.category,
     wordcount: bodyOf(p).replace(/<[^>]*>/g, ' ').trim().split(/\s+/).length,
     timeRequired: p.read_time || undefined,
-    author: {'@type': 'Person', name: p.author || AUTHOR, url: `${location.origin}/#home`},
-    publisher: {'@type': 'Person', name: AUTHOR, url: `${location.origin}/#home`},
+    author: {'@type': 'Person', name: p.author || AUTHOR, url: `${location.origin}/#landingDiv`},
+    publisher: {'@type': 'Person', name: AUTHOR, url: `${location.origin}/#landingDiv`},
   });
   document.head.appendChild(script);
 }
