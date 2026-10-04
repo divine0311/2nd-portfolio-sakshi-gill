@@ -3,6 +3,12 @@ import { MdArrowOutward } from "react-icons/md";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { about, profile } from "../data/sakshi";
+import {
+  SEND_MESSAGE,
+  SEND_MESSAGE_NO_MAIL,
+  submitContactMessage,
+  validateContactMessage,
+} from "../lib/contact";
 import "./styles/ConnectBox.css";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -26,27 +32,46 @@ const Connect = () => {
   const boxRef = useRef<HTMLDivElement>(null);
   const [fields, setFields] = useState<FormFields>(EMPTY);
   const [status, setStatus] = useState("");
+  const [sending, setSending] = useState(false);
 
-  /**
-   * No backend is wired up, so the form hands the message to the visitor's
-   * mail client. This always works and never silently drops a message the way
-   * a fake fetch-to-nothing would.
-   */
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!fields.name.trim() || !fields.email.trim() || !fields.message.trim()) {
-      setStatus("Please fill in your name, email and a message.");
-      return;
-    }
-
+  /** Last resort when the message could not be stored: hand it to the mail app. */
+  const openMailApp = () => {
     const subject = encodeURIComponent(`Portfolio enquiry from ${fields.name}`);
     const body = encodeURIComponent(
       `${fields.message}\n\n—\n${fields.name}\n${fields.email}`,
     );
-
     window.location.href = `mailto:${profile.email}?subject=${subject}&body=${body}`;
-    setStatus("Opening your mail app…");
+  };
+
+  /**
+   * Stores the enquiry in Supabase and asks the notify-contact edge function to
+   * email it through Resend (src/lib/contact.ts). If that path is unavailable,
+   * the visitor's own mail app is opened so the message is never lost.
+   */
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (sending) return;
+
+    const invalid = validateContactMessage(fields);
+    if (invalid) {
+      setStatus(invalid);
+      return;
+    }
+
+    setSending(true);
+    setStatus("Sending…");
+
+    const result = await submitContactMessage(fields);
+
+    setSending(false);
+    if (!result.ok) {
+      setStatus(`${result.error} Opening your mail app…`);
+      openMailApp();
+      return;
+    }
+
+    setFields(EMPTY);
+    setStatus(result.notify === "sent" ? SEND_MESSAGE : SEND_MESSAGE_NO_MAIL);
   };
 
   /** Tilts the box toward the pointer. Disabled on touch, where it has no meaning. */
@@ -163,8 +188,9 @@ const Connect = () => {
                 type="submit"
                 className="connect-submit"
                 data-cursor="disable"
+                disabled={sending}
               >
-                Send message
+                {sending ? "Sending…" : "Send message"}
               </button>
             </form>
           </div>
