@@ -1,0 +1,19 @@
+{
+  "name": "Sakshi Gill | Digital Marketer, AI Creator & Editor",
+  "short_name": "Sakshi Gill",
+  "description": "Portfolio of Sakshi Gill, digital marketer, AI developer and video editor in Kaithal, Haryana.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b080c",
+  "theme_color": "#0b080c",
+  "lang": "en-IN",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

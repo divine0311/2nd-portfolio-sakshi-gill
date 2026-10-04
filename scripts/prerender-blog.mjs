@@ -1,18 +1,25 @@
 /**
- * Build-time blog prerender.
+ * Build-time prerender and absolute-URL pass.
  *
  * Reads published posts from Supabase with the public anon key (RLS allows
  * public reads of published rows only). If the database is unreachable or
  * empty, the bundled seed is prerendered instead so the site always ships
  * real crawlable HTML.
  *
- * Emits:
- *   dist/blog/index.html            listing, with cards in the markup
- *   dist/blog/<slug>/index.html     one static page per post, with the full
- *                                   article text, meta tags and JSON-LD
- *   dist/sitemap.xml                home, blog and every post
+ * Every built page carries root-relative canonical/Open Graph URLs, which
+ * crawlers reject. This script rewrites them to absolute using SITE_URL, so
+ * there is exactly one place in the repo that knows the live domain.
  *
- * Run after `vite build`:  npm run prerender
+ * Emits:
+ *   dist/index.html             home page with absolute canonical, OG and JSON-LD URLs
+ *   dist/blog/index.html        listing, with cards in the markup
+ *   dist/blog/<slug>/index.html one static page per post, with the full
+ *                              article text, meta tags and JSON-LD
+ *   dist/sitemap.xml            home, blog and every post
+ *   dist/robots.txt             allows the site, points at the sitemap
+ *
+ * Runs automatically after `vite build`; also runnable on its own:
+ *   npm run prerender
  */
 import {readFileSync, writeFileSync, mkdirSync, existsSync} from 'node:fs';
 import {join, dirname} from 'node:path';
@@ -41,11 +48,17 @@ const AUTHOR = seed.author;
 /* Canonical URLs and the sitemap need a real origin. There is no deployment
  * URL in this repo, so it must come from SITE_URL rather than be guessed. */
 const rawSite = (env.SITE_URL || '').replace(/\/$/, '');
-if (!rawSite) {
-  console.warn('  ! SITE_URL is not set in .env — canonical tags and sitemap.xml');
-  console.warn('    will point at localhost. Set SITE_URL to your live domain.');
-}
 const siteUrl = rawSite || 'http://localhost:4173';
+
+/* A placeholder would ship silently-broken canonicals to production, which is
+ * worse than an obvious build warning. */
+if (!rawSite || /YOUR-DOMAIN|example\.(com|org)|localhost/i.test(rawSite)) {
+  console.warn('');
+  console.warn('  ! SITE_URL is not a real domain in .env.');
+  console.warn(`    Every canonical, Open Graph and sitemap URL will point at "${siteUrl}".`);
+  console.warn('    Set SITE_URL to the live domain before deploying, then rebuild.');
+  console.warn('');
+}
 
 /* ---------------- fetch ---------------- */
 
@@ -134,7 +147,25 @@ function prettyDate(value) {
 
 /* ---------------- head blocks ---------------- */
 
-function applyHead(html, {title, description, canonical, jsonLd}) {
+const OG_IMAGE = '/images/og-cover.jpg';
+const SITE_NAME = 'Sakshi Gill';
+
+/** Turns every root-relative asset URL in a built page into an absolute one. */
+function absolutise(html) {
+  return html
+    .replace(/(content|href)="\/(?!\/)/g, `$1="${siteUrl}/`)
+    .replace(/"(url|image)"\s*:\s*"\/(?!\/)/g, `"$1":"${siteUrl}/`);
+}
+
+/**
+ * Rewrites the title, description, canonical, Open Graph and Twitter tags, then
+ * injects JSON-LD. Existing og:/twitter: tags are stripped first so a page never
+ * ends up with two conflicting sets after a rebuild.
+ */
+function applyHead(
+  html,
+  {title, description, canonical, type = 'website', jsonLd, publishedTime},
+) {
   let out = html;
 
   out = out.replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(title)}</title>`);
@@ -143,23 +174,36 @@ function applyHead(html, {title, description, canonical, jsonLd}) {
     `<meta name="description" content="${esc(description)}" />`,
   );
 
-  const og = [
+  // Strip the template's static social tags; the block below replaces them.
+  out = out
+    .replace(/[ \t]*<link rel="canonical"[^>]*>\n?/g, '')
+    .replace(/[ \t]*<meta property="og:[^"]*"[^>]*>\n?/g, '')
+    .replace(/[ \t]*<meta name="twitter:[^"]*"[^>]*>\n?/g, '');
+
+  const head = [
+    `<link rel="canonical" href="${esc(canonical)}" />`,
     `<meta property="og:title" content="${esc(title)}" />`,
     `<meta property="og:description" content="${esc(description)}" />`,
-    `<meta property="og:type" content="website" />`,
+    `<meta property="og:type" content="${esc(type)}" />`,
     `<meta property="og:url" content="${esc(canonical)}" />`,
-    `<meta name="twitter:card" content="summary_large_image" />`,
-  ].join('\n    ');
+    `<meta property="og:site_name" content="${SITE_NAME}" />`,
+    `<meta property="og:locale" content="en_IN" />`,
+    publishedTime
+      ? `<meta property="article:published_time" content="${esc(publishedTime)}" />`
+      : '',
+    `<meta property="og:image" content="${siteUrl}${OG_IMAGE}" />`,
+    '<meta property="og:image:width" content="1200" />',
+    '<meta property="og:image:height" content="630" />',
+    `<meta property="og:image:alt" content="${esc(title)}" />`,
+    '<meta name="twitter:card" content="summary_large_image" />',
+    `<meta name="twitter:title" content="${esc(title)}" />`,
+    `<meta name="twitter:description" content="${esc(description)}" />`,
+    `<meta name="twitter:image" content="${siteUrl}${OG_IMAGE}" />`,
+  ]
+    .filter(Boolean)
+    .join('\n    ');
 
-  // Only the listing carries a canonical in the template; posts get one added.
-  if (/<link rel="canonical"/.test(out)) {
-    out = out.replace(
-      /<link rel="canonical"[\s\S]*?\/>/,
-      `<link rel="canonical" href="${esc(canonical)}" />\n    ${og}`,
-    );
-  } else {
-    out = out.replace('</head>', `    <link rel="canonical" href="${esc(canonical)}" />\n    ${og}\n  </head>`);
-  }
+  out = out.replace('</head>', `    ${head}\n  </head>`);
 
   if (jsonLd) {
     out = out.replace(
@@ -167,8 +211,9 @@ function applyHead(html, {title, description, canonical, jsonLd}) {
       `    <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>\n  </head>`,
     );
   }
-  return out;
+  return absolutise(out);
 }
+
 
 /* ---------------- listing ---------------- */
 
@@ -315,17 +360,25 @@ for (const p of posts) {
     datePublished: p.date,
     dateModified: p.date,
     articleSection: p.category,
-    wordcount: p.body.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).length,
+    wordCount: p.body.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).length,
     timeRequired: p.read,
     inLanguage: 'en',
-    author: {'@type': 'Person', name: p.author || AUTHOR, url: `${siteUrl}/#home`},
-    publisher: {'@type': 'Person', name: AUTHOR, url: `${siteUrl}/#home`},
+    image: `${siteUrl}${OG_IMAGE}`,
+    author: {'@type': 'Person', name: p.author || AUTHOR, url: `${siteUrl}/`},
+    publisher: {'@type': 'Person', name: AUTHOR, url: `${siteUrl}/`},
   };
 
   const canonical = `${siteUrl}/blog/${p.slug}`;
   const html = applyHead(
     postTemplate.replace(/<main id="post"[\s\S]*?<\/main>/, `<main id="post" class="blog-wrap">${article}</main>`),
-    {title: p.metaTitle, description: p.metaDescription, canonical, jsonLd},
+    {
+      title: p.metaTitle,
+      description: p.metaDescription,
+      canonical,
+      type: 'article',
+      publishedTime: p.date,
+      jsonLd,
+    },
   );
 
   const dir = join(dist, 'blog', p.slug);
@@ -334,9 +387,18 @@ for (const p of posts) {
   console.log(`  dist/blog/${p.slug}/index.html`);
 }
 
+/* home page: the SPA shell ships with relative canonical/OG URLs, so they are
+ * rewritten to absolute here, where the real domain is known. */
+const homeFile = join(dist, 'index.html');
+if (existsSync(homeFile)) {
+  const home = readFileSync(homeFile, 'utf8');
+  writeFileSync(homeFile, absolutise(home));
+  console.log('  dist/index.html (absolute URLs)');
+}
+
 /* sitemap */
 const urls = [
-  {loc: `${siteUrl}/#home`, priority: '1.0'},
+  {loc: `${siteUrl}/`, priority: '1.0'},
   {loc: `${siteUrl}/blog`, priority: '0.8'},
   ...posts.map((p) => ({loc: `${siteUrl}/blog/${p.slug}`, lastmod: p.date, priority: '0.6'})),
 ];
@@ -357,8 +419,16 @@ const sitemap =
 writeFileSync(join(dist, 'sitemap.xml'), sitemap);
 console.log('  dist/sitemap.xml');
 
-/* robots */
-const robots = `User-agent: *\nAllow: /\nSitemap: ${siteUrl}/sitemap.xml\n`;
+/* robots: the studio and any API routes must stay out of the index */
+const robots = [
+  'User-agent: *',
+  'Allow: /',
+  'Disallow: /admin',
+  'Disallow: /admin/',
+  '',
+  `Sitemap: ${siteUrl}/sitemap.xml`,
+  '',
+].join('\n');
 writeFileSync(join(dist, 'robots.txt'), robots);
 console.log('  dist/robots.txt');
 
