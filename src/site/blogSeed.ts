@@ -39,11 +39,11 @@ export function categoryGlyph(category: string | null | undefined): string {
 
 /** Real routes in the existing site. */
 export const LINKS = {
-  home: '/#home',
+  home: '/#landingDiv',
   blog: '/blog',
   services: '/#capabilities',
   contact: '/#connect',
-  email: 'divinesakshi03gmail.com@gmail.com',
+  email: 'gillsakshi22@gmail.com',
 };
 
 type SeedRow = (typeof seed.posts)[number];
