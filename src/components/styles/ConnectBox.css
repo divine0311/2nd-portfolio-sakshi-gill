@@ -160,15 +160,18 @@
 }
 
 .connect-direct-email {
-  display: inline-block;
-  font-size: clamp(19px, 2vw, 28px);
-  font-weight: 500;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
-  padding-bottom: 4px;
-  margin-bottom: 24px;
-  word-break: break-word;
-  color: #ffffff;
-}
+   display: inline-flex;
+   align-items: center;
+   font-size: clamp(19px, 2vw, 28px);
+   font-weight: 500;
+   border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+   /* The underline stays at the text baseline; the extra height is the tap area. */
+   min-height: 44px;
+   padding-bottom: 4px;
+   margin-bottom: 24px;
+   word-break: break-word;
+   color: #ffffff;
+   }
 
 .connect-direct-email:hover {
   border-bottom-color: #ffffff;
@@ -181,11 +184,15 @@
 }
 
 a.connect-social {
-  font-size: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
-  padding-bottom: 2px;
-  width: fit-content;
-}
+   font-size: 16px;
+   border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+   /* Keep the underline on the text, but grow the clickable row to 44px. */
+   display: inline-flex;
+   align-items: center;
+   min-height: 44px;
+   padding-bottom: 2px;
+   width: fit-content;
+   }
 
 a.connect-social:hover {
   border-bottom-color: #ffffff;

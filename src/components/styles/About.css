@@ -1,13 +1,16 @@
 .about-section {
   display: flex;
-  align-items: center;
-  justify-content: left;
-  place-items: center;
+  /* One column on a phone: side by side, the story and the vision block each
+     got a ~130px column and the text overflowed its own box. */
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
   position: relative;
   opacity: 1;
   height: auto;
   width: var(--cWidth);
   margin: auto;
+  overflow: hidden;
 }
 .about-me {
   padding: 50px 0px;
@@ -83,9 +86,15 @@
   }
 }
 
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 600px) and (max-width: 1024px) {
   .about-section {
     justify-content: center;
+    align-items: center;
+  }
+  .about-me,
+  .about-vision {
+    text-align: center;
+    align-items: center;
   }
 }
 @media only screen and (min-width: 768px) {
@@ -100,12 +109,17 @@
 }
 @media only screen and (min-width: 1025px) {
   .about-section {
-    width: var(--cWidth);
+    flex-direction: row;
+    align-items: center;
     justify-content: right;
+    place-items: center;
+    gap: 0;
+    width: var(--cWidth);
     max-width: 1920px;
     height: var(--vh);
     padding: 0px;
     opacity: 1;
+    overflow: visible;
   }
   .about-me {
     padding: 0px;

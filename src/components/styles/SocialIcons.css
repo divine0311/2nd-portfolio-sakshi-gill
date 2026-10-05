@@ -40,6 +40,12 @@
   top: var(--siTop, 50%);
   transform: translate(-50%, -50%);
   display: flex;
+  /* The icon glyph is 28px; a transparent box around it makes the hit area a
+     comfortable 44px without moving anything. */
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
   font-size: 23px;
   will-change: left, top;
   transition: transform 0.3s ease-out;

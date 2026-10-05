@@ -194,10 +194,17 @@
   color: var(--backgroundColor);
 }
 .loader-title {
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.2px;
-}
+   font-weight: 700;
+   font-size: 14px;
+   letter-spacing: 0.2px;
+   /* The word sits on a narrow preloader column; min-width keeps the link at a
+      comfortable hit size on a phone. */
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   min-height: 44px;
+   min-width: 44px;
+   }
 @keyframes blink {
   0% {
     opacity: 0;
@@ -224,24 +231,30 @@
 }
 
 .loaderGame-container {
-  width: 200px;
-  transition: 0.3s;
-  height: 100px;
-  overflow: hidden;
-  position: relative;
-  transform: scale(0.4);
-  transform-origin: top right;
-}
+      width: 200px;
+      transition: 0.3s;
+      height: 100px;
+      /* Clips the 1200px-wide strip of decorative bars, which is what used to
+         register as page overflow on narrow screens. */
+      overflow: hidden;
+      position: relative;
+      max-width: 100%;
+      transform: scale(0.4);
+      transform-origin: top right;
+      }
 .loader-out .loaderGame-container {
   opacity: 0;
 }
 .loaderGame-in {
-  width: 1200px;
-  position: absolute;
-  overflow: hidden;
-  left: 0;
-  animation: loaderGame 7s linear infinite;
-}
+      width: 1200px;
+      position: absolute;
+      overflow: hidden;
+      left: 0;
+      /* The strip is wider than any phone; it is animated, so its right edge must
+         not add to the document width. */
+      max-width: none;
+      animation: loaderGame 7s linear infinite;
+      }
 @keyframes loaderGame {
   0% {
     transform: translateX(0px);

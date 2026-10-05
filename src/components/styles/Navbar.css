@@ -24,12 +24,22 @@
   min-width: 0;
 }
 
+.navbar-title,
+.navbar-blog,
+.navbar-connect {
+  /* Keep the tap area at 44px even though the type is 15-18px. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
 .navbar-blog {
   font-size: 15px;
   letter-spacing: 3px;
   font-weight: 600;
   text-transform: uppercase;
   white-space: nowrap;
+  /* Hidden below 900px; the hamburger menu carries these links there. */
   display: none;
 }
 

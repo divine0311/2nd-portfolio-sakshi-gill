@@ -219,12 +219,16 @@
 h2.landing-info-h2 {
   color: #c481ff;
   font-size: 42px;
+  /* 120% is for the fade below, but it must never push the page sideways:
+     the overflow is clipped by the parent instead of by the viewport. */
   width: 120%;
+  max-width: none;
   margin: 0;
   font-family: "Geist", sans-serif;
   font-weight: 600;
   position: relative;
   margin-left: -5px;
+  overflow-wrap: break-word;
 }
 .landing-h2-2 {
   position: absolute;

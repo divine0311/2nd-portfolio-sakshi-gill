@@ -230,9 +230,6 @@ export async function deleteCapability(key: string): Promise<SaveResult> {
   return {ok: true};
 }
 
-const BLOG_COLUMNS =
-  'id,title,date,excerpt,content,thumbnail_url,slug,category,read_time,created_at,meta_title,meta_description,body,author,published,published_at';
-
 /**
  * Columns that only exist after `supabase/blog-modernisation.sql` has been
  * run. Until then we read and write the legacy set only, so the site and the
@@ -247,30 +244,35 @@ let v2Available = true;
 export async function loadBlogPosts(): Promise<BlogPost[] | null> {
   if (!supabase) return null;
 
+  // Ask for every column once and keep the fields we understand. The v2 SEO
+  // columns only exist after the migration, and requesting them by name made
+  // PostgREST answer 400 on an un-migrated database - a console error on every
+  // blog page load, plus a wasted round trip before the fallback ran.
   let result = await withTimeout(
-    supabase.from('blog_posts').select(BLOG_COLUMNS).order('created_at', {ascending: false}),
+    supabase.from('blog_posts').select('*').order('created_at', {ascending: false}),
   );
 
-  // The v2 columns only exist after the migration, so the first query is
-  // expected to fail with PGRST204 (column not found) on an un-migrated
-  // database. That is a normal fallback, not a real error, so it is not
-  // logged - only unexpected failures are.
+  // If selecting * failed, the table itself may be unreachable; fall back to
+  // the explicit legacy column list before giving up.
   if (result?.error) {
     v2Available = false;
-    // PostgREST reports a missing column as PGRST204 / 42703 in the message.
-    const expected = /PGRST204|42703|column/i.test(result.error.message);
-    if (!expected && import.meta.env.DEV) console.warn('blog_posts:', result.error.message);
+    if (import.meta.env.DEV) console.warn('blog_posts:', result.error.message);
     result = await withTimeout(
       supabase.from('blog_posts').select(LEGACY_COLUMNS).order('created_at', {ascending: false}),
     );
   }
 
+  // Detect the migration from the row shape instead of from a failed query.
   const rows = result?.data as BlogPost[] | null | undefined;
+  if (rows?.length) {
+    const first = rows[0] as unknown as Record<string, unknown>;
+    v2Available = 'body' in first || 'published' in first;
+  }
   if (!rows) return null;
   return rows;
 }
 
-/** Drops v2 keys when the database has not been migrated yet. */
+  /** Drops v2 keys when the database has not been migrated yet. */
 function shape(input: BlogPostInput): BlogPostInput {
   if (v2Available) return input;
   const out = {...input} as Record<string, unknown>;

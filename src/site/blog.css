@@ -119,11 +119,22 @@ h1.hero {
 }
 
 .lede {
-  max-width: 560px;
-  margin: 0 auto;
-  color: var(--muted);
-  font-size: 17px;
-}
+   max-width: 560px;
+   margin: 0 auto;
+   color: var(--muted);
+   font-size: 17px;
+   }
+
+   /* Links inside a sentence are prose, but they still need a usable hit area on
+      a phone. Padding adds height without disturbing the line rhythm. */
+   .lede a,
+   .prose a,
+   .cta a,
+   .cta2 a {
+   display: inline-block;
+   min-height: 44px;
+   padding: 10px 0;
+   }
 
 .stats {
   display: flex;
@@ -296,9 +307,11 @@ h1.hero {
 }
 
 .pill {
-  font: inherit;
-  font-size: 14px;
-  padding: 9px 20px;
+   font: inherit;
+   font-size: 14px;
+   /* 44px tall filter chips; the radius makes the extra height read as design. */
+   min-height: 44px;
+   padding: 11px 20px;
   border-radius: 999px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.03);
@@ -339,8 +352,9 @@ h1.hero {
 }
 
 .arrs button {
-  width: 38px;
-  height: 38px;
+  /* 44px minimum tap target (was 38px). */
+  width: 44px;
+  height: 44px;
   border-radius: 0;
   border: 1px solid var(--line);
   background: var(--surface);
@@ -362,11 +376,15 @@ h1.hero {
 .row {
   display: flex;
   gap: 20px;
+  /* The card row scrolls sideways inside this container, so the wide cards
+     never widen the page itself. */
+  max-width: 100%;
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none;
   padding: 20px 16px 40px;
   scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
 }
 
 .row::-webkit-scrollbar {
@@ -383,7 +401,9 @@ h1.hero {
 
 .card {
   display: block;
-  flex: 0 0 min(290px, 80vw);
+  /* Leaves room for the row's own padding, so a card never peeks past the edge. */
+  flex: 0 0 min(290px, 78vw);
+  max-width: 100%;
   aspect-ratio: 4 / 5;
   perspective: 900px;
   text-decoration: none;
@@ -547,13 +567,19 @@ h1.hero {
 }
 
 .pg button {
-  font: inherit;
-  color: var(--muted);
-  background: none;
-  border: 0;
-  cursor: pointer;
-  padding: 4px 6px;
-}
+   font: inherit;
+   color: var(--muted);
+   background: none;
+   border: 0;
+   cursor: pointer;
+   /* Prev/Next and page numbers: full-height and wide enough to tap. */
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   min-height: 44px;
+   min-width: 44px;
+   padding: 10px 8px;
+   }
 
 .pg button:hover {
   color: var(--accent);
@@ -661,14 +687,18 @@ footer.site {
 }
 
 .ft a,
-.ft button,
-.ft span {
-  display: block;
-  color: var(--muted);
-  text-decoration: none;
-  background: none;
-  border: 0;
-  padding: 0;
+   .ft button,
+   .ft span {
+   display: block;
+   color: var(--muted);
+   text-decoration: none;
+   background: none;
+   border: 0;
+   /* Footer links are stacked, so a 44px row costs nothing visually. */
+   min-height: 44px;
+   padding: 12px 0;
+   display: flex;
+   align-items: center;
   margin: 0 0 10px;
   font: inherit;
   text-align: left;
@@ -793,8 +823,12 @@ article > .author {
   border: 0;
   color: var(--muted);
   cursor: pointer;
+  /* 44px tall tap target; the text itself is only 14px. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   padding: 0;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
   font-size: 14px;
   transition: color 0.25s ease;
 }
@@ -898,6 +932,15 @@ article p {
   color: var(--muted);
 }
 
+/* An inline link inside running text is hard to tap; give it a 44px hit area
+   without changing how the sentence reads. */
+.author a {
+  display: inline-block;
+  min-height: 44px;
+  padding: 12px 2px;
+  color: var(--accent);
+}
+
 .author b {
   color: var(--text);
   font-weight: 600;
@@ -918,12 +961,15 @@ article p {
 }
 
 .rel a {
-  color: var(--text);
-  font-weight: 500;
-  text-decoration: none;
-  font-size: 18px;
-  transition: color 0.25s ease;
-}
+   color: var(--text);
+   font-weight: 500;
+   text-decoration: none;
+   font-size: 18px;
+   transition: color 0.25s ease;
+   min-height: 44px;
+   display: flex;
+   align-items: center;
+   }
 
 .rel a:hover {
   color: var(--accent);
