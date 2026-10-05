@@ -13,50 +13,54 @@
   padding: 50px 0px;
   padding-bottom: 0;
   width: 500px;
-  max-width: calc(100% - 15px);
+  max-width: 100%;
 }
+
 .about-me h3 {
-  font-size: 25px;
+  font-size: clamp(18px, 5.4vw, 25px);
   text-transform: uppercase;
-  letter-spacing: 7px;
+  letter-spacing: clamp(3px, 1.6vw, 7px);
   font-weight: 400;
   color: var(--accentColor);
 }
 
 .about-me p {
-  font-size: 33px;
+  font-size: clamp(22px, 7.6vw, 33px);
   font-weight: 600;
-  line-height: 36px;
+  line-height: 1.1;
   letter-spacing: 1px;
+  overflow-wrap: break-word;
 }
-
 /* Vision block sits opposite the story on wide screens. */
 .about-vision {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  padding: 50px 0px 0px;
-  width: 42%;
-  max-width: calc(100% - 15px);
+  padding: 34px 0px 0px;
+  /* Full width until there is room for two columns - at 42% on a phone the
+     34px heading had a 145px box and burst out of it. */
+  width: 100%;
+  max-width: 100%;
 }
 
 .about-vision h4 {
-  font-size: 14px;
+  font-size: 13px;
   text-transform: uppercase;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   font-weight: 400;
   color: var(--accentColor);
 }
 
 .about-vision h3 {
-  font-size: 34px;
+  font-size: clamp(24px, 7vw, 34px);
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.5px;
+  overflow-wrap: break-word;
 }
 
 .about-vision p {
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.65;
   color: #cfc9d4;
 }

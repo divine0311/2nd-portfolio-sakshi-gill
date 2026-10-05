@@ -251,9 +251,15 @@ export async function loadBlogPosts(): Promise<BlogPost[] | null> {
     supabase.from('blog_posts').select(BLOG_COLUMNS).order('created_at', {ascending: false}),
   );
 
-  // Missing new columns: fall back to the legacy set and remember it.
+  // The v2 columns only exist after the migration, so the first query is
+  // expected to fail with PGRST204 (column not found) on an un-migrated
+  // database. That is a normal fallback, not a real error, so it is not
+  // logged - only unexpected failures are.
   if (result?.error) {
     v2Available = false;
+    // PostgREST reports a missing column as PGRST204 / 42703 in the message.
+    const expected = /PGRST204|42703|column/i.test(result.error.message);
+    if (!expected && import.meta.env.DEV) console.warn('blog_posts:', result.error.message);
     result = await withTimeout(
       supabase.from('blog_posts').select(LEGACY_COLUMNS).order('created_at', {ascending: false}),
     );

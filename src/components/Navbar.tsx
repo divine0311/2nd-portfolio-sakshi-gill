@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { gsap } from "gsap";
 import type { ScrollSmoother } from "gsap-trial/ScrollSmoother";
@@ -16,6 +16,10 @@ export let smoother: ScrollSmoother | undefined;
  * separate site with its own menu.
  */
 const Navbar = ({ active = "home" }: { active?: "home" | "blog" }) => {
+  const [open, setOpen] = useState(false);
+  const menuId = useId();
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     const wrapper = document.getElementById("smooth-wrapper");
     const content = document.getElementById("smooth-content");
@@ -51,12 +55,53 @@ const Navbar = ({ active = "home" }: { active?: "home" | "blog" }) => {
     };
   }, []);
 
+  // Close the menu on Escape, and hand focus back to the button that opened it.
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      toggleRef.current?.focus();
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
+  // The menu is a short list under the header, so the page behind it stays
+  // visible; only the scroll is held to stop the page moving behind the panel.
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
   return (
     <>
       <div className="header">
         <a href="/#landingDiv" className="navbar-title" data-cursor="disable">
           {profile.logoText}
         </a>
+
+        {/* Below 900px the links move into this menu, because the email address
+            alone does not fit next to the logo on a phone. */}
+        <button
+          type="button"
+          className="navbar-toggle"
+          ref={toggleRef}
+          aria-expanded={open}
+          aria-controls={menuId}
+          aria-label={open ? "Close menu" : "Open menu"}
+          onClick={() => setOpen((value) => !value)}
+        >
+          <span className="navbar-toggle-bar" aria-hidden="true" />
+          <span className="navbar-toggle-bar" aria-hidden="true" />
+        </button>
+
         <div className="header-right">
           {/* Full page load: the blog is its own entry, not an anchor. */}
           <a
@@ -75,6 +120,37 @@ const Navbar = ({ active = "home" }: { active?: "home" | "blog" }) => {
             {profile.email}
           </a>
         </div>
+      </div>
+
+      <div className="navbar-menu" id={menuId} hidden={!open}>
+        <nav aria-label="Site">
+          <a href="/#landingDiv" onClick={() => setOpen(false)}>
+            Home
+          </a>
+          <a
+            href="/blog"
+            onClick={() => setOpen(false)}
+            aria-current={active === "blog" ? "page" : undefined}
+          >
+            Blog
+          </a>
+          <a href="/#work" onClick={() => setOpen(false)}>
+            My Work
+          </a>
+          <a href="/#capabilities" onClick={() => setOpen(false)}>
+            My Capabilities
+          </a>
+          <a href="/#connect" onClick={() => setOpen(false)}>
+            Connect
+          </a>
+        </nav>
+        <a
+          className="navbar-menu-email"
+          href={`mailto:${profile.email}`}
+          onClick={() => setOpen(false)}
+        >
+          {profile.email}
+        </a>
       </div>
 
       {active === "home" && (

@@ -22,6 +22,37 @@ const HOST_ID = "blog-robot";
 
 let booted = false;
 
+/**
+ * True on phones, tablets and anything that has asked to save data or reduce
+ * motion. The model is 1.5MB and the scene animates continuously, so those
+ * devices skip WebGL entirely.
+ */
+function shouldSkipWebGL(): boolean {
+  if (!window.matchMedia("(min-width: 1024px)").matches) return true;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
+
+  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } })
+    .connection;
+  if (connection?.saveData) return true;
+
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  const cores = navigator.hardwareConcurrency ?? 8;
+  const memory = nav.deviceMemory ?? 8;
+  if (cores <= 4 || memory <= 4) return true;
+
+  return false;
+}
+
+/**
+ * The fallback is pure CSS (see `.blog-robot.is-static` in blog.css): an accent
+ * glow instead of a WebGL canvas. No model download, no render loop, no image
+ * request - so it costs nothing on a low-end device.
+ */
+function showStaticFallback(host: HTMLElement): void {
+  host.replaceChildren();
+  host.classList.add("is-static");
+}
+
 /** Mirrors Character/utils/lighting.ts, minus the GSAP tween the blog has no use for. */
 function setBlogLighting(scene: THREE.Scene): void {
   const key = new THREE.DirectionalLight(0xc7a9ff, 1);
@@ -47,10 +78,22 @@ export function mountRobot(): void {
   booted = true;
 
   const host = document.getElementById(HOST_ID) as HTMLDivElement | null;
-  const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const roomy = window.matchMedia("(min-width: 1024px)").matches;
-  if (!host || calm || !roomy) {
-    host?.classList.add("is-off");
+  if (!host) return;
+
+  if (shouldSkipWebGL()) {
+    showStaticFallback(host);
+    return;
+  }
+
+  // WebGL can still be missing entirely (blocked, or a driver hiccup).
+  try {
+    const probe = document.createElement("canvas");
+    if (!(probe.getContext("webgl2") || probe.getContext("webgl"))) {
+      showStaticFallback(host);
+      return;
+    }
+  } catch {
+    showStaticFallback(host);
     return;
   }
 
@@ -67,15 +110,28 @@ export function mountRobot(): void {
   renderer.domElement.setAttribute("aria-hidden", "true");
   host.appendChild(renderer.domElement);
 
+  /**
+   * `setSize(w, h, false)` leaves the CSS size alone, so the canvas is laid out
+   * by `.blog-robot canvas { width: 100%; height: 100% }` and can never be
+   * wider than its slot. Passing the default third argument writes an inline
+   * pixel width on the canvas, which is what used to push the whole document
+   * ~800px sideways on desktop.
+   */
   const resize = () => {
     const rect = host.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
-    renderer.setSize(width, height);
+    renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
   };
   resize();
+
+  // The host is moved between hero slots and the window can be resized, so the
+  // box is re-measured whenever it changes rather than only on mount.
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(resize).observe(host);
+  }
 
   setBlogLighting(scene);
 

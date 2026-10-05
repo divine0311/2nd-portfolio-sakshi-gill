@@ -1,7 +1,6 @@
 import "./styles/Work.css";
 import WorkImage from "./WorkImage";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { projects } from "../data/sakshi";
 
@@ -9,49 +8,60 @@ gsap.registerPlugin(useGSAP);
 
 const Work = () => {
   useGSAP(() => {
-  let translateX: number = 0;
+    /**
+     * The pinned horizontal scroll is a desktop-only effect. On a phone the
+     * section is 100vh tall with a flex row of fixed-width cards, which turned
+     * the row into a ~94000px sideways-scrolling strip and cut the cards off.
+     * Below 1024px the cards stack (Work.css) and this effect is not built, so
+     * gsap.matchMedia also tears it down when the viewport shrinks.
+     */
+    const mm = gsap.matchMedia();
 
-  function setTranslateX() {
-    const box = document.getElementsByClassName("work-box");
-    const rectLeft = document
-      .querySelector(".work-container")!
-      .getBoundingClientRect().left;
-    const rect = box[0].getBoundingClientRect();
-    const parentWidth = box[0].parentElement!.getBoundingClientRect().width;
-    const padding: number =
-      parseInt(window.getComputedStyle(box[0]).padding) / 2;
-    translateX = rect.width * box.length - (rectLeft + parentWidth) + padding;
-  }
+    mm.add("(min-width: 1024px)", () => {
+      const boxes = gsap.utils.toArray<HTMLElement>(".work-box");
+      const flex = document.querySelector<HTMLElement>(".work-flex");
+      const container = document.querySelector<HTMLElement>(".work-container");
+      if (boxes.length < 2 || !flex || !container) return;
 
-  setTranslateX();
+      /** How far the row has to travel for its last card to reach the edge. */
+      const distance = () => {
+        const rectLeft = container.getBoundingClientRect().left;
+        const rect = boxes[0].getBoundingClientRect();
+        const parentWidth = flex.getBoundingClientRect().width;
+        const padding =
+          parseInt(window.getComputedStyle(boxes[0]).paddingLeft) / 2;
+        return rect.width * boxes.length - (rectLeft + parentWidth) + padding;
+      };
 
-  // With few cards the row may not overflow the container, which would give a
-  // negative translateX and make the pin scroll the wrong way. Skip the pinned
-  // horizontal scroll in that case and let the section flow normally.
-  if (translateX <= 0) return;
+      // With few cards the row may not overflow the container, which would give
+      // a negative travel and make the pin scroll the wrong way. Skip the pinned
+      // scroll in that case and let the section flow normally.
+      if (distance() <= 0) return;
 
-  const timeline = gsap.timeline({
-    scrollTrigger: {
-      trigger: ".work-section",
-      start: "top top",
-      end: `+=${translateX}`, // Use actual scroll width
-      scrub: true,
-      pin: true,
-      id: "work",
-    },
-  });
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".work-section",
+          start: "top top",
+          // Recomputed on refresh so a resize cannot leave the pin stale.
+          end: () => "+=" + Math.max(1, distance()),
+          scrub: true,
+          pin: true,
+          id: "work",
+          invalidateOnRefresh: true,
+        },
+      });
 
-  timeline.to(".work-flex", {
-    x: -translateX,
-    ease: "none",
-  });
+      timeline.to(flex, { x: () => -distance(), ease: "none" });
 
-  // Clean up (optional, good practice)
-  return () => {
-    timeline.kill();
-    ScrollTrigger.getById("work")?.kill();
-  };
-}, []);
+      return () => {
+        timeline.scrollTrigger?.kill();
+        timeline.kill();
+      };
+    });
+
+    return () => mm.revert();
+  }, []);
+
   return (
     <div className="work-section" id="work">
       <div className="work-container section-container">

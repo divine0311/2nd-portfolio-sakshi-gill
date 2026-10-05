@@ -51,6 +51,10 @@ body.blog-body {
   font-family: 'Geist', system-ui, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  /* Nothing on the blog is meant to scroll sideways. `clip` instead of `hidden`
+     so it cannot accidentally become a scroll container on iOS. */
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .serif {
@@ -197,6 +201,7 @@ h1.hero {
 .blog-robot {
   position: relative;
   width: 100%;
+  max-width: 100%;
   height: 100%;
   min-height: 320px;
   opacity: 0;
@@ -214,14 +219,39 @@ h1.hero {
   display: none;
 }
 
+/* Pure-CSS fallback for devices that skip WebGL: no model download, no canvas,
+   no render loop. Just the accent glow the robot used to sit inside. */
+.blog-robot.is-static {
+  opacity: 1;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(closest-side, rgba(194, 164, 255, 0.22), transparent 72%),
+    radial-gradient(closest-side at 50% 62%, rgba(143, 107, 255, 0.14), transparent 70%);
+}
+
+.blog-robot.is-static::after {
+  content: "";
+  width: min(58%, 220px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid rgba(194, 164, 255, 0.35);
+  box-shadow:
+    0 0 60px rgba(194, 164, 255, 0.18),
+    inset 0 0 60px rgba(194, 164, 255, 0.1);
+}
+
 .blog-robot canvas {
   display: block;
   width: 100%;
   height: 100%;
+  max-width: 100%;
 }
 
 .hero-slot {
   position: relative;
+  min-width: 0;
 }
 
 @media (max-width: 1023px) {

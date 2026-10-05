@@ -53,6 +53,120 @@
   letter-spacing: 0.2px;
   white-space: nowrap;
 }
+
+/* ---- mobile menu ---- */
+
+.navbar-toggle {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  /* 44px minimum tap target even though the bars are 20px wide. */
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  order: 3;
+}
+
+.navbar-toggle-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+.navbar-toggle[aria-expanded="true"] .navbar-toggle-bar:first-child {
+  transform: translateY(4px) rotate(45deg);
+}
+
+.navbar-toggle[aria-expanded="true"] .navbar-toggle-bar:last-child {
+  transform: translateY(-4px) rotate(-45deg);
+}
+
+.navbar-toggle:focus-visible {
+  outline: 2px solid var(--accentColor);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Sits under the header and only takes the height it needs, so it never
+   covers the page content behind it. */
+.navbar-menu {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--cWidth);
+  max-width: var(--cMaxWidth);
+  z-index: 9998;
+  /* Header height on small screens: 20px padding + the 44px button + 20px. */
+  margin-top: 84px;
+  padding: 18px 0 22px;
+  background: rgba(11, 8, 12, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  animation: navbar-menu-in 0.22s ease;
+}
+
+.navbar-menu[hidden] {
+  display: none;
+}
+
+@keyframes navbar-menu-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.navbar-menu nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar-menu nav a {
+  display: flex;
+  align-items: center;
+  /* 44px tall rows for comfortable tapping. */
+  min-height: 44px;
+  padding: 10px 2px;
+  font-size: 16px;
+  letter-spacing: 2px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #eae5ec;
+}
+
+.navbar-menu nav a[aria-current="page"] {
+  color: var(--accentColor);
+}
+
+.navbar-menu-email {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  color: #cfc9d4;
+  overflow-wrap: anywhere;
+}
+
 @media only screen and (min-width: 500px) {
   .header {
     padding: 20px 0px;
@@ -61,7 +175,14 @@
     font-size: 16px;
   }
 }
+/* From here the links fit in the bar again, so the menu button goes away. */
 @media only screen and (min-width: 900px) {
+  .navbar-toggle {
+    display: none;
+  }
+  .navbar-menu {
+    display: none;
+  }
   .navbar-connect {
     display: block;
   }
