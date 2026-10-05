@@ -45,9 +45,22 @@ const env = readEnv();
 const seed = JSON.parse(readFileSync(join(root, 'src/site/blogSeed.json'), 'utf8'));
 const AUTHOR = seed.author;
 
-/* Canonical URLs and the sitemap need a real origin. There is no deployment
- * URL in this repo, so it must come from SITE_URL rather than be guessed. */
-const rawSite = (env.SITE_URL || '').trim().replace(/\/$/, '');
+/* Canonical URLs and the sitemap need a real origin. SITE_URL is the source of
+ * truth, but Vercel injects its own hostname at build time, so a project
+ * deployed without a custom domain still produces absolute URLs.
+ *
+ * VERCEL_PROJECT_PRODUCTION_URL is the stable *.vercel.app name for the project.
+ * VERCEL_URL is per-deployment, so it is only used for a production build -
+ * on a preview it would put a throwaway hash domain into the canonical. */
+const vercelHost = (() => {
+  const stable = (process.env.VERCEL_PROJECT_PRODUCTION_URL || '').trim();
+  if (stable) return stable;
+  if (process.env.VERCEL_ENV === 'production') return (process.env.VERCEL_URL || '').trim();
+  return '';
+})();
+const vercelSite = vercelHost ? `https://${vercelHost.replace(/^https?:\/\//, '').replace(/\/$/, '')}` : '';
+
+const rawSite = (env.SITE_URL || vercelSite || '').trim().replace(/\/$/, '');
 
 /**
  * A placeholder must never reach production. A canonical or og:url pointing at
@@ -58,6 +71,10 @@ const rawSite = (env.SITE_URL || '').trim().replace(/\/$/, '');
  */
 const knownSite = Boolean(rawSite) && !/YOUR-DOMAIN|example\.(com|org)|localhost/i.test(rawSite);
 const siteUrl = knownSite ? rawSite : '';
+
+if (knownSite && !env.SITE_URL) {
+  console.log(`  site origin from Vercel: ${siteUrl}`);
+}
 
 if (!knownSite) {
   console.warn('');

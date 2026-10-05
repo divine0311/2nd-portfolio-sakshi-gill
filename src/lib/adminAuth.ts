@@ -10,6 +10,17 @@ export interface AuthState {
 
 const INITIAL: AuthState = {authenticated: false, email: null, loading: true, error: null};
 
+/**
+ * Supabase answers a malformed address with a bare "Email not valid", which
+ * gives the user nothing to act on. Checking the format here lets us name the
+ * address back, so a missing "@" is obvious instead of a dead end.
+ */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function badEmailMessage(address: string): string {
+  return `"${address}" is not a valid email address - check for a missing @ or a typo.`;
+}
+
 export function onAuthChange(listener: (state: AuthState) => void): () => void {
   if (!supabase) {
     listener({...INITIAL, loading: false, error: 'Supabase is not configured.'});
@@ -34,7 +45,12 @@ export function onAuthChange(listener: (state: AuthState) => void): () => void {
 export async function signIn(email: string, password: string): Promise<AuthState> {
   if (!supabase) return {...INITIAL, loading: false, error: 'Supabase is not configured.'};
 
-  const {data, error} = await supabase.auth.signInWithPassword({email: email.trim(), password});
+  const address = email.trim();
+  if (!EMAIL_RE.test(address)) {
+    return {...INITIAL, loading: false, error: badEmailMessage(address)};
+  }
+
+  const {data, error} = await supabase.auth.signInWithPassword({email: address, password});
   if (error) {
     const invalid = /invalid login credentials/i.test(error.message);
     return {
@@ -64,12 +80,17 @@ export interface SignUpResult {
  */
 export async function signUp(email: string, password: string): Promise<SignUpResult> {
   if (!supabase) return {ok: false, needsConfirmation: false, error: 'Supabase is not configured.'};
+
+  const address = email.trim();
+  if (!EMAIL_RE.test(address)) {
+    return {ok: false, needsConfirmation: false, error: badEmailMessage(address)};
+  }
   if (password.length < 8) {
     return {ok: false, needsConfirmation: false, error: 'Password must be at least 8 characters.'};
   }
 
   const {data, error} = await supabase.auth.signUp({
-    email: email.trim(),
+    email: address,
     password,
     options: {emailRedirectTo: `${window.location.origin}/admin`},
   });
