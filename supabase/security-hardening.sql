@@ -18,14 +18,19 @@
 --   policies change first you will lock yourself out of /admin.
 --
 --   1. Run STEP 1.
---   2. Authentication -> Users -> copy YOUR user UUID, paste it into STEP 2,
---      and run STEP 2. The check query must return exactly one row.
+--   2. Run STEP 2. The check query at the bottom of that step must return
+--      exactly one row, with your own email on it.
 --   3. Run STEP 3 onwards.
 --   4. Authentication -> Providers -> Email -> switch OFF "Allow signups".
 --      This is what stops anyone else from creating an account at all.
 --   5. Sign out and back in at /admin to confirm you can still edit.
 --
 -- The whole file is idempotent: running it twice changes nothing.
+--
+-- ---------------------------------------------------------------------------
+-- AFTER YOU FINISH: go to Authentication -> Users and delete every account you
+-- do not recognise. Disable signups (step 4) stops new ones, but it does not
+-- remove accounts that were created while it was still open.
 -- ============================================================================
 
 
@@ -63,13 +68,25 @@ grant execute on function public.is_studio_admin() to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- STEP 2 - register yourself as the studio admin (RUN BEFORE STEP 3)
+--
+-- Put YOUR email on the line below. It must match the account you sign in to
+-- /admin with, exactly. It is looked up in auth.users, so you do not need to
+-- find a UUID anywhere.
 -- ---------------------------------------------------------------------------
 insert into public.studio_admins (user_id)
-values ('PASTE-YOUR-SUPABASE-USER-UUID-HERE'::uuid)
+select id
+from auth.users
+where lower(email) = lower('divinesakshi03@gmail.com')  -- <-- YOUR EMAIL
 on conflict (user_id) do nothing;
 
--- Sanity check: this must return exactly one row before you continue.
--- select * from public.studio_admins;
+-- Sanity check: this must return EXACTLY ONE row before you continue.
+-- If it returns zero, the email above does not match an existing auth user:
+--   create the user first at Authentication -> Users -> Add user, then re-run.
+-- If it returns more than one, two accounts share that email - delete the
+-- ones you do not own (see the reminder at the end of this file).
+select u.email, a.user_id, a.created_at
+from public.studio_admins a
+join auth.users u on u.id = a.user_id;
 
 
 

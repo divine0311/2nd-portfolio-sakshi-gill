@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { gsap } from "gsap";
-import type { ScrollSmoother } from "gsap-trial/ScrollSmoother";
+import type { ScrollSmoother } from "gsap/ScrollSmoother";
 import { profile } from "../data/sakshi";
 import "./styles/Navbar.css";
 
@@ -30,7 +30,7 @@ const Navbar = ({ active = "home" }: { active?: "home" | "blog" }) => {
     let disposed = false;
 
     (async () => {
-      const { ScrollSmoother } = await import("gsap-trial/ScrollSmoother");
+      const { ScrollSmoother } = await import("gsap/ScrollSmoother");
       if (disposed) return;
       gsap.registerPlugin(ScrollSmoother, ScrollTrigger);
       smoother = ScrollSmoother.create({
